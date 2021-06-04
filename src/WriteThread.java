@@ -1,19 +1,25 @@
+import java.io.IOException;
+import java.io.ObjectOutputStream;
 import java.io.OutputStream;
-import java.io.PrintWriter;
 import java.util.Scanner;
 
 public class WriteThread extends Thread{
 
     Scanner scanner = new Scanner(System.in);
 
+    private ObjectOutputStream objOut;
     private OutputStream out;
-    private PrintWriter writer;
     private Player player;
+
 
     public WriteThread(OutputStream out, Player player){
         this.out = out;
-        writer = new PrintWriter(out,true);
         this.player = player;
+        try {
+            objOut = new ObjectOutputStream(out);
+        } catch (IOException io){
+            io.printStackTrace();
+        }
     }
 
     public void run()
@@ -21,7 +27,7 @@ public class WriteThread extends Thread{
         while (!(player.isNameAccepted())){
             String name  = scanner.nextLine();
             player.setName(name);
-            writer.println(name);
+           sendMessage(name);
             try {
                 Thread.sleep(2000);
             } catch (InterruptedException e){
@@ -34,7 +40,7 @@ public class WriteThread extends Thread{
             String msg = scanner.nextLine();
             if(msg.equalsIgnoreCase("ready"))
                 player.setReady(true);
-            writer.println(msg);
+            sendMessage(msg);
         }
         try {
             Thread.sleep(2000);
@@ -47,7 +53,17 @@ public class WriteThread extends Thread{
             System.out.println("enter message: ");
             String msg = scanner.nextLine();
             msg = player.getName() + ": " + msg;
-            writer.println(msg);
+            sendMessage(msg);
+        }
+    }
+
+    private void sendMessage(String msg){
+        if (msg != null) {
+            try {
+                objOut.writeObject(new Message(msg));
+            } catch (IOException io){
+                io.printStackTrace();
+            }
         }
     }
 }
