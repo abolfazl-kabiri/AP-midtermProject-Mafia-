@@ -6,6 +6,8 @@ public class PlayerHandler extends Thread{
     private Server server;
     private Socket socket;
     private String playerName;
+    private Role playerRole;
+    private boolean isReady;
     private ObjectInputStream in;
     private ObjectOutputStream out;
 
@@ -20,19 +22,32 @@ public class PlayerHandler extends Thread{
         } catch (IOException io){
             io.printStackTrace();
         }
+        isReady = false;
+    }
 
+    public boolean isReady() {
+        return isReady;
+    }
+
+    public void setReady(boolean ready) {
+        isReady = ready;
     }
 
     public void setPlayerName(String playerName) {
         this.playerName = playerName;
     }
 
+    public void setPlayerRole(Role playerRole) {
+        this.playerRole = playerRole;
+    }
+
     String msg = "";
     Message message = null;
 
-    public void run()
-    {
+    public void run() {
         setup();
+        sendMessage("game started");
+
         do {
             try {
                 message = (Message) in.readObject();
@@ -46,7 +61,7 @@ public class PlayerHandler extends Thread{
         } while (true);
     }
 
-    private void setup(){
+    private void handleName(){
         sendMessage("enter your name: ");
         try {
             message = (Message) in.readObject();
@@ -59,7 +74,7 @@ public class PlayerHandler extends Thread{
 
         if(server.checkName(msg)){
             sendMessage("welcome " + msg);
-            setPlayerName(msg);
+            this.playerName = msg;
         }
         else
         {
@@ -80,9 +95,10 @@ public class PlayerHandler extends Thread{
             sendMessage("welcome " + msg);
             setPlayerName(msg);
         }
+    }
 
+    private void handleReady(){
         sendMessage("write \"ready\" to start match");
-
         try {
             message = (Message) in.readObject();
             while (message == null)
@@ -96,12 +112,32 @@ public class PlayerHandler extends Thread{
             c.printStackTrace();
         }
 
+        setReady(true);
         sendMessage("ok wait for other players");
 
+        try{
+            Thread.sleep(10000);
+        } catch (InterruptedException in){
+            in.printStackTrace();
+        }
     }
 
-    public void sendMessage(String msg)
-    {
+    private void setup(){
+
+        handleName();
+
+        handleReady();
+
+        while (!(server.canStartGame())){
+            try{
+                Thread.sleep(500);
+            } catch (InterruptedException in){
+                in.printStackTrace();
+            }
+        }
+    }
+
+    public void sendMessage(String msg) {
         try {
             if(msg != null)
             {
@@ -109,6 +145,15 @@ public class PlayerHandler extends Thread{
                 out.writeObject(message);
             }
         }  catch (IOException io){
+            io.printStackTrace();
+        }
+    }
+
+    public void sendMessage(Role role){
+        try{
+            if(role != null)
+                out.writeObject(role);
+        } catch (IOException io){
             io.printStackTrace();
         }
     }

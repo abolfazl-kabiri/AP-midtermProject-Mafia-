@@ -1,2 +1,2 @@
-public class Citizen {
+public class Citizen extends Role{
 }
