@@ -46,6 +46,9 @@ public class PlayerHandler extends Thread{
 
     public void run() {
         setup();
+
+        handleRole();
+
         sendMessage("game started");
 
         do {
@@ -60,6 +63,8 @@ public class PlayerHandler extends Thread{
             }
         } while (true);
     }
+
+
 
     private void handleName(){
         sendMessage("enter your name: ");
@@ -120,6 +125,19 @@ public class PlayerHandler extends Thread{
         } catch (InterruptedException in){
             in.printStackTrace();
         }
+    }
+
+    private void handleRole() {
+        while (playerRole == null){
+            try {
+                Thread.sleep(500);
+            } catch (InterruptedException interruptedException) {
+                interruptedException.printStackTrace();
+            }
+        }
+
+        sendMessage(playerRole);
+        sendMessage("your role is \"" + playerRole.toString() + "\"");
     }
 
     private void setup(){

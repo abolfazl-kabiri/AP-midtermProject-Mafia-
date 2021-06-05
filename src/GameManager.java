@@ -20,6 +20,10 @@ public class GameManager extends Thread {
     }
 
 
+    public void run(){
+        setPlayersRoles();
+    }
+
     private void createMafiaRoles(){
         Godfather godfather = new Godfather();
         roles.add(godfather);
@@ -27,7 +31,7 @@ public class GameManager extends Thread {
         DrLector drLector = new DrLector();
         roles.add(drLector);
 
-        for(int i = 2; i<=numberOfMafias ; i++){
+        for(int i = 2; i < numberOfMafias ; i++){
             SimpleMafia simpleMafia = new SimpleMafia();
             roles.add(simpleMafia);
         }
@@ -52,7 +56,7 @@ public class GameManager extends Thread {
         Sniper sniper = new Sniper();
         roles.add(sniper);
 
-        for(int i = 6; i <= numberOfCitizens; i++){
+        for(int i = 6; i < numberOfCitizens; i++){
             SimpleCitizen simpleCitizen = new SimpleCitizen();
             roles.add(simpleCitizen);
         }
@@ -67,10 +71,7 @@ public class GameManager extends Thread {
     public void setPlayersRoles(){
         for(int i=0; i<numberOfPlayers; i++){
             players.get(i).setPlayerRole(roles.get(i));
-//            players.get(i).sendMessage(roles.get(i));
-//            players.get(i).sendMessage("your role is \"" + roles.get(i).toString() +"\"");
         }
     }
-
 }
 

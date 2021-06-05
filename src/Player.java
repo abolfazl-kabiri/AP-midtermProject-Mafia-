@@ -1,4 +1,3 @@
-import javax.management.relation.Role;
 import java.io.*;
 import java.net.Socket;
 import java.net.UnknownHostException;
@@ -33,6 +32,8 @@ public class Player {
 
             handleReady();
 
+            handleRole();
+
             new ReadThread(in,this).start();
             new WriteThread(out,this).start();
         } catch (UnknownHostException u) {
@@ -41,6 +42,7 @@ public class Player {
             io.printStackTrace();
         }
     }
+
 
     Message message = null;
     String msg = "";
@@ -102,6 +104,31 @@ public class Player {
             e.printStackTrace();
         }
     }
+
+    private void handleRole() {
+        Role r = null;
+        while (r == null){
+            try {
+                r = (Role) in.readObject();
+            } catch (IOException e) {
+                e.printStackTrace();
+            } catch (ClassNotFoundException e) {
+                e.printStackTrace();
+            }
+        }
+        setRole(r);
+
+        try {
+            message = (Message) in.readObject();
+            msg = message.getText();
+            System.out.println(msg);
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+        }
+    }
+
 
     public Role getRole() {
         return role;

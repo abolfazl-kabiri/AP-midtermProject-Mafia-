@@ -24,7 +24,21 @@ public class Server {
 
         acceptPlayers();
 
+        while (!(canStartGame())){
+            try {
+                Thread.sleep(1000);
+            } catch (InterruptedException interruptedException) {
+                interruptedException.printStackTrace();
+            }
+        }
+        try {
+            Thread.sleep(500);
+        } catch (InterruptedException interruptedException) {
+            interruptedException.printStackTrace();
+        }
+
         GameManager gameManager = new GameManager(playerHandlers,numberOfPlayers);
+        gameManager.start();
     }
 
     private void acceptPlayers(){
