@@ -26,7 +26,7 @@ public class Server {
 
         while (!(canStartGame())){
             try {
-                Thread.sleep(1000);
+                Thread.sleep(500);
             } catch (InterruptedException interruptedException) {
                 interruptedException.printStackTrace();
             }
@@ -36,6 +36,7 @@ public class Server {
         } catch (InterruptedException interruptedException) {
             interruptedException.printStackTrace();
         }
+
 
         GameManager gameManager = new GameManager(playerHandlers,numberOfPlayers);
         gameManager.start();
@@ -99,7 +100,6 @@ public class Server {
     public void addNewName(String name){
         playerNames.add(name);
     }
-
 
     public static void main(String[] args) {
         Server server = new Server();

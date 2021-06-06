@@ -34,8 +34,17 @@ public class Player {
 
             handleRole();
 
-            new ReadThread(in,this).start();
-            new WriteThread(out,this).start();
+            handleIntroduction();
+
+//            try {
+//                wait();
+//            } catch (InterruptedException interruptedException) {
+//                interruptedException.printStackTrace();
+//            }
+
+//            new ReadThread(in,this).start();
+//            new WriteThread(out,this).start();
+
         } catch (UnknownHostException u) {
             u.printStackTrace();
         } catch (IOException io){
@@ -129,9 +138,22 @@ public class Player {
         }
     }
 
-
-    public Role getRole() {
-        return role;
+    private void handleIntroduction(){
+        if(role instanceof Mafia || role instanceof Mayor){
+            message = null;
+            while (message == null){
+                try {
+                    message = (Message) in.readObject();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                    break;
+                } catch (ClassNotFoundException e) {
+                    e.printStackTrace();
+                    break;
+                }
+            } msg = message.getText();
+            System.out.println(msg);
+        }
     }
 
     public void setRole(Role role) {

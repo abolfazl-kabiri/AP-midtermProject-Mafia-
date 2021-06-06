@@ -10,10 +10,10 @@ public class PlayerHandler extends Thread{
     private boolean isReady;
     private ObjectInputStream in;
     private ObjectOutputStream out;
+    private boolean isAwake;
 
 
-    public PlayerHandler( Server server,Socket socket)
-    {
+    public PlayerHandler( Server server,Socket socket) {
         this.server = server;
         this.socket = socket;
         try{
@@ -41,30 +41,43 @@ public class PlayerHandler extends Thread{
         this.playerRole = playerRole;
     }
 
+    public Role getPlayerRole() {
+        return playerRole;
+    }
+
     String msg = "";
     Message message = null;
 
     public void run() {
         setup();
 
+        waitPlayer();
+
         handleRole();
 
-        sendMessage("game started");
-
-        do {
-            try {
-                message = (Message) in.readObject();
-                if(message != null){
-                    System.out.println(message.getText());
-                    server.broadcast(message.getText(),this);
-                }
-            } catch (ClassNotFoundException | IOException c){
-                c.printStackTrace();
-            }
-        } while (true);
+       handleIntroduction();
+//
+//        do {
+//            try {
+//                message = (Message) in.readObject();
+//                if(message != null){
+//                    System.out.println(message.getText());
+//                    server.broadcast(message.getText(),this);
+//                }
+//            } catch (ClassNotFoundException | IOException c){
+//                c.printStackTrace();
+//            }
+//        } while (true);
     }
 
 
+    public String getPlayerName() {
+        return playerName;
+    }
+
+    public void setMsg(String msg){
+        this.msg = msg;
+    }
 
     private void handleName(){
         sendMessage("enter your name: ");
@@ -119,25 +132,30 @@ public class PlayerHandler extends Thread{
 
         setReady(true);
         sendMessage("ok wait for other players");
-
-        try{
-            Thread.sleep(10000);
-        } catch (InterruptedException in){
-            in.printStackTrace();
-        }
     }
 
     private void handleRole() {
-        while (playerRole == null){
-            try {
-                Thread.sleep(500);
-            } catch (InterruptedException interruptedException) {
-                interruptedException.printStackTrace();
-            }
-        }
 
         sendMessage(playerRole);
         sendMessage("your role is \"" + playerRole.toString() + "\"");
+    }
+
+    private void handleIntroduction() {
+        msg = null;
+        waitPlayer();
+        if(msg != null){
+            sendMessage(msg);
+        }
+    }
+
+    private void waitPlayer(){
+        try {
+            synchronized (this){
+                this.wait();
+            }
+        } catch (InterruptedException interruptedException) {
+            interruptedException.printStackTrace();
+        }
     }
 
     private void setup(){
@@ -146,13 +164,6 @@ public class PlayerHandler extends Thread{
 
         handleReady();
 
-        while (!(server.canStartGame())){
-            try{
-                Thread.sleep(500);
-            } catch (InterruptedException in){
-                in.printStackTrace();
-            }
-        }
     }
 
     public void sendMessage(String msg) {
