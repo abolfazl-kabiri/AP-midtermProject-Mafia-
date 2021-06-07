@@ -11,6 +11,7 @@ public class PlayerHandler extends Thread{
     private ObjectInputStream in;
     private ObjectOutputStream out;
     private boolean isAwake;
+    private boolean chatTime;
 
 
     public PlayerHandler( Server server,Socket socket) {
@@ -56,18 +57,13 @@ public class PlayerHandler extends Thread{
         handleRole();
 
        handleIntroduction();
-//
-//        do {
-//            try {
-//                message = (Message) in.readObject();
-//                if(message != null){
-//                    System.out.println(message.getText());
-//                    server.broadcast(message.getText(),this);
-//                }
-//            } catch (ClassNotFoundException | IOException c){
-//                c.printStackTrace();
-//            }
-//        } while (true);
+
+       waitPlayer();
+
+       handleChatTime();
+
+
+
     }
 
 
@@ -137,7 +133,7 @@ public class PlayerHandler extends Thread{
     private void handleRole() {
 
         sendMessage(playerRole);
-        sendMessage("your role is \"" + playerRole.toString() + "\"");
+        sendMessage("your role is \"" + playerRole.toString() + "\"\n");
     }
 
     private void handleIntroduction() {
@@ -145,6 +141,31 @@ public class PlayerHandler extends Thread{
         waitPlayer();
         if(msg != null){
             sendMessage(msg);
+        }
+    }
+
+    private void handleChatTime(){
+        sendMessage("It is day\nyou can chat for 5 minutes");
+
+        msg = null;
+        this.chatTime = true;
+        while (chatTime){
+
+            if(msg != null){
+                sendMessage(msg);
+                chatTime = false;
+                break;
+            }
+
+            try {
+                message = (Message) in.readObject();
+                if(message != null){
+                    System.out.println(message.getText());
+                    server.broadcast(message.getText(),this);
+                }
+            } catch (ClassNotFoundException | IOException c){
+                c.printStackTrace();
+            }
         }
     }
 

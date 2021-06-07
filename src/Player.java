@@ -20,6 +20,10 @@ public class Player {
         isReady = false;
     }
 
+
+    ReadThread readThread ;
+    WriteThread writeThread ;
+
     public void start() {
         try {
             Socket socket = new Socket("127.0.0.1",port);
@@ -27,6 +31,9 @@ public class Player {
 
             out = new ObjectOutputStream(socket.getOutputStream());
             in = new ObjectInputStream(socket.getInputStream());
+
+            readThread = new ReadThread(in,this);
+            writeThread = new WriteThread(out,this);
 
             handleName();
 
@@ -36,14 +43,10 @@ public class Player {
 
             handleIntroduction();
 
-//            try {
-//                wait();
-//            } catch (InterruptedException interruptedException) {
-//                interruptedException.printStackTrace();
-//            }
+            startThreads();
 
-//            new ReadThread(in,this).start();
-//            new WriteThread(out,this).start();
+            handleChat();
+
 
         } catch (UnknownHostException u) {
             u.printStackTrace();
@@ -51,6 +54,7 @@ public class Player {
             io.printStackTrace();
         }
     }
+
 
 
     Message message = null;
@@ -156,6 +160,28 @@ public class Player {
         }
     }
 
+    private void startThreads() {
+        writeThread.start();
+        readThread.start();
+    }
+
+    private void handleChat() {
+        while (readThread.getState() != Thread.State.WAITING && readThread.getState() != Thread.State.TIMED_WAITING){
+            try {
+                Thread.sleep(500);
+            } catch (InterruptedException inter){
+                inter.printStackTrace();
+            }
+        }
+        try {
+            synchronized (writeThread){
+                writeThread.wait();
+            }
+        } catch (InterruptedException inter){
+            inter.printStackTrace();
+        }
+    }
+
     public void setRole(Role role) {
         this.role = role;
     }
@@ -180,4 +206,6 @@ public class Player {
         Player player = new Player();
         player.start();
     }
+
+
 }

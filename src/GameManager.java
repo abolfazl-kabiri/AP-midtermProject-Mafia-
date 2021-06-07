@@ -1,6 +1,4 @@
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Vector;
+import java.util.*;
 
 public class GameManager extends Thread {
 
@@ -11,6 +9,7 @@ public class GameManager extends Thread {
    private int numberOfMafias;
    private int numberOfCitizens;
    private ArrayList<Role> roles;
+
 
     public GameManager(Vector<PlayerHandler> players, int numberOfPlayers) {
         this.players = players;
@@ -29,11 +28,21 @@ public class GameManager extends Thread {
         if(allWaiting())
             setPlayersRoles();
 
-        sleepGame(5000);
+        sleepGame(2000);
 
         introductions();
 
-        System.out.println("done");
+        sleepGame(2000);
+
+        chat();
+
+        votes();
+    }
+
+    private void votes(){
+        while (!allWaiting())
+            sleepGame(500);
+        System.out.println("vote");
     }
 
     private void notifyPlayers(){
@@ -158,6 +167,26 @@ public class GameManager extends Thread {
             }
             notifyPlayers();
         }
+    }
+
+    private void chat(){
+
+        while (!(allWaiting())){
+            sleepGame(500);
+        }
+        notifyPlayers();
+
+        Timer timer = new Timer();
+        TimerTask timerTask = new TimerTask() {
+            @Override
+            public void run() {
+                System.out.println("chat time over");
+                for(PlayerHandler player : players)
+                    player.setMsg("chat time over");
+            }
+        };
+        timer.schedule(timerTask,60*1000);
+
     }
 
     private void sleepGame( int millis){

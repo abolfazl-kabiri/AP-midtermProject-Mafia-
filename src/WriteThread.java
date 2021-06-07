@@ -18,10 +18,14 @@ public class WriteThread extends Thread{
     public void run() {
         while (true)
         {
-            System.out.println("enter message: ");
-            String msg = scanner.nextLine();
-            msg = player.getName() + ": " + msg;
-            sendMessage(msg);
+            if(!Thread.currentThread().isInterrupted())
+            {
+                String msg = scanner.nextLine();
+                if(msg.trim().length() > 0){
+                    msg = player.getName() + ": " + msg;
+                    sendMessage(msg);
+                }
+            }
         }
     }
 

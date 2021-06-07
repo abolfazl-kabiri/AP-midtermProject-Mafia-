@@ -21,6 +21,15 @@ public class ReadThread extends Thread {
                 Message message =(Message) in.readObject();
                 String msg = ((Message) message).getText();
                 System.out.println(msg);
+                if(msg.equals("chat time over")){
+                    try {
+                        synchronized (this){
+                            this.wait();
+                        }
+                    } catch (InterruptedException inter){
+                        inter.printStackTrace();
+                    }
+                }
             } catch (IOException io){
                 io.printStackTrace();
             } catch (ClassNotFoundException c){

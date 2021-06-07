@@ -24,7 +24,7 @@ public class Server {
 
         acceptPlayers();
 
-        while (!(canStartGame())){
+        while (!(allReady())){
             try {
                 Thread.sleep(500);
             } catch (InterruptedException interruptedException) {
@@ -72,7 +72,7 @@ public class Server {
         }
     }
 
-    public boolean canStartGame(){
+    public boolean allReady(){
         int counter = 0;
         boolean start = true;
         for(int i = 0; i< playerHandlers.size(); i++){
