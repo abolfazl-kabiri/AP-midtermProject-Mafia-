@@ -145,8 +145,9 @@ public class PlayerHandler extends Thread{
     }
 
     private void handleChatTime(){
-        sendMessage("It is day\nyou can chat for 5 minutes");
+        sendMessage("It is day\nyou can chat for 5 minutes or you can send \"ready\" to stop sending");
 
+        this.isReady = false;
         msg = null;
         this.chatTime = true;
         while (chatTime){
@@ -154,6 +155,7 @@ public class PlayerHandler extends Thread{
             if(msg != null){
                 sendMessage(msg);
                 chatTime = false;
+                this.isReady = true;
                 break;
             }
 
@@ -161,6 +163,10 @@ public class PlayerHandler extends Thread{
                 message = (Message) in.readObject();
                 if(message != null){
                     System.out.println(message.getText());
+                    if(message.getText().contains("ready")){
+                        this.isReady = true;
+                        break;
+                    }
                     server.broadcast(message.getText(),this);
                 }
             } catch (ClassNotFoundException | IOException c){
@@ -168,6 +174,7 @@ public class PlayerHandler extends Thread{
             }
         }
     }
+
 
     private void waitPlayer(){
         try {

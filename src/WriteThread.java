@@ -18,14 +18,26 @@ public class WriteThread extends Thread{
     public void run() {
         while (true)
         {
-            if(!Thread.currentThread().isInterrupted())
+            String msg = scanner.nextLine();
+            if(msg.equalsIgnoreCase("ready"))
             {
-                String msg = scanner.nextLine();
-                if(msg.trim().length() > 0){
-                    msg = player.getName() + ": " + msg;
-                    sendMessage(msg);
-                }
+                msg = player.getName() + ": " + msg;
+                sendMessage(msg);
+                writerWait();
+            }else {
+                msg = player.getName() + ": " + msg;
+                sendMessage(msg);
             }
+        }
+    }
+
+    private void writerWait(){
+        try {
+            synchronized (this){
+                this.wait();
+            }
+        } catch (InterruptedException inter){
+            inter.printStackTrace();
         }
     }
 

@@ -5,19 +5,16 @@ import java.util.Scanner;
 
 public class Player {
 
-
     private ObjectOutputStream out;
     private ObjectInputStream in;
     private int port;
     private String name;
-    private boolean isReady;
     private Role role;
 
     Scanner scanner = new Scanner(System.in);
 
     public Player() {
         port = setPort();
-        isReady = false;
     }
 
 
@@ -99,17 +96,16 @@ public class Player {
                 msg = message.getText();
                 System.out.println(msg);
 
-                msg = scanner.nextLine();
-                out.writeObject(new Message(msg));
+                while (!(msg.equalsIgnoreCase("ready"))){
+                    msg = scanner.nextLine();
+                    out.writeObject(new Message(msg));
+                }
 
                 message = (Message) in.readObject();
                 msg = message.getText();
                 System.out.println(msg);
                 if(msg.startsWith("ok wait"))
-                {
-                    this.isReady = true;
                     break;
-                }
             }
         } catch (IOException e) {
             e.printStackTrace();
@@ -166,19 +162,16 @@ public class Player {
     }
 
     private void handleChat() {
-        while (readThread.getState() != Thread.State.WAITING && readThread.getState() != Thread.State.TIMED_WAITING){
+        while (readThread.getState() != Thread.State.WAITING && readThread.getState() != Thread.State.TIMED_WAITING)
+            continue;
+        if(writeThread.getState() != Thread.State.WAITING && writeThread.getState() != Thread.State.TIMED_WAITING){
             try {
-                Thread.sleep(500);
+                synchronized (writeThread){
+                    writeThread.wait();
+                }
             } catch (InterruptedException inter){
                 inter.printStackTrace();
             }
-        }
-        try {
-            synchronized (writeThread){
-                writeThread.wait();
-            }
-        } catch (InterruptedException inter){
-            inter.printStackTrace();
         }
     }
 

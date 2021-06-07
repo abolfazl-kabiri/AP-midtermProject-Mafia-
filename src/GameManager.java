@@ -9,10 +9,12 @@ public class GameManager extends Thread {
    private int numberOfMafias;
    private int numberOfCitizens;
    private ArrayList<Role> roles;
+   private Server server;
 
 
-    public GameManager(Vector<PlayerHandler> players, int numberOfPlayers) {
+    public GameManager(Vector<PlayerHandler> players, int numberOfPlayers, Server server) {
         this.players = players;
+        this.server = server;
         mafias = new Vector<>();
         citizens = new Vector<>();
         this.numberOfPlayers = numberOfPlayers;
@@ -180,13 +182,30 @@ public class GameManager extends Thread {
         TimerTask timerTask = new TimerTask() {
             @Override
             public void run() {
-                System.out.println("chat time over");
-                for(PlayerHandler player : players)
-                    player.setMsg("chat time over");
+                endChat1();
             }
         };
-        timer.schedule(timerTask,60*1000);
+        timer.schedule(timerTask,2*60*1000);
 
+        while (!server.allReady())
+            sleepGame(500);
+        if (server.allReady()){
+            timer.cancel();
+            endChat2();
+        }
+
+    }
+
+    private void endChat1(){
+        System.out.println("chat is over");
+        for(PlayerHandler player : players)
+            player.setMsg("chat time over");
+    }
+
+    private void endChat2(){
+        System.out.println("chat is over");
+        for(PlayerHandler player : players)
+            player.sendMessage("chat time over");
     }
 
     private void sleepGame( int millis){

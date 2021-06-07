@@ -38,7 +38,7 @@ public class Server {
         }
 
 
-        GameManager gameManager = new GameManager(playerHandlers,numberOfPlayers);
+        GameManager gameManager = new GameManager(playerHandlers,numberOfPlayers, this);
         gameManager.start();
     }
 
