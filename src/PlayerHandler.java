@@ -12,6 +12,7 @@ public class PlayerHandler extends Thread{
     private ObjectOutputStream out;
     private boolean isAwake;
     private boolean chatTime;
+    private boolean isAlive;
 
 
     public PlayerHandler( Server server,Socket socket) {
@@ -24,6 +25,16 @@ public class PlayerHandler extends Thread{
             io.printStackTrace();
         }
         isReady = false;
+        isAlive = true;
+    }
+
+
+   public boolean playerIsAlive(){
+        return isAlive;
+   }
+
+    public void setAlive(boolean alive) {
+        isAlive = alive;
     }
 
     public boolean isReady() {
@@ -62,10 +73,42 @@ public class PlayerHandler extends Thread{
 
        handleChatTime();
 
+       waitForAll();
+       waitPlayer();
+       System.out.println("woke up\n");
+
+       vote();
+
 
 
     }
 
+    private Message getMessage(){
+        message = null;
+        while (message == null){
+            try {
+                message = (Message) in.readObject();
+            } catch (IOException | ClassNotFoundException e){
+                e.printStackTrace();
+            }
+        }
+        return message;
+    }
+
+    private void sleep(int millis){
+        try {
+            Thread.sleep(millis);
+        } catch (InterruptedException inter){
+            inter.printStackTrace();
+        }
+    }
+
+    private void waitForAll(){
+        while (!(server.allReady())){
+            sleep(500);
+        }
+        sleep(2000);
+    }
 
     public String getPlayerName() {
         return playerName;
@@ -77,14 +120,9 @@ public class PlayerHandler extends Thread{
 
     private void handleName(){
         sendMessage("enter your name: ");
-        try {
-            message = (Message) in.readObject();
-            while (message == null)
-                message = (Message) in.readObject();
-            msg = message.getText();
-        } catch (ClassNotFoundException | IOException c){
-            c.printStackTrace();
-        }
+
+        message = getMessage();
+        msg = message.getText();
 
         if(server.checkName(msg)){
             sendMessage("welcome " + msg);
@@ -96,15 +134,8 @@ public class PlayerHandler extends Thread{
                 sendMessage("this name is already taken");
                 sendMessage("enter a new name: ");
 
-                try {
-                    message = (Message) in.readObject();
-                    while (message == null)
-                        message = (Message) in.readObject();
-                    msg = message.getText();
-                } catch (ClassNotFoundException | IOException c){
-                    c.printStackTrace();
-                }
-
+                message = getMessage();
+                msg = message.getText();
             }
             sendMessage("welcome " + msg);
             setPlayerName(msg);
@@ -113,27 +144,18 @@ public class PlayerHandler extends Thread{
 
     private void handleReady(){
         sendMessage("write \"ready\" to start match");
-        try {
-            message = (Message) in.readObject();
-            while (message == null)
-                message = (Message) in.readObject();
+            message = getMessage();
             msg = message.getText();
             while (!(msg.equalsIgnoreCase("ready"))){
-                message = (Message) in.readObject();
+                message = getMessage();
                 msg = message.getText();
             }
-        } catch (ClassNotFoundException | IOException c){
-            c.printStackTrace();
-        }
-
-        setReady(true);
+        this.isReady = true;
         sendMessage("ok wait for other players");
     }
 
     private void handleRole() {
-
         sendMessage(playerRole);
-        sendMessage("your role is \"" + playerRole.toString() + "\"\n");
     }
 
     private void handleIntroduction() {
@@ -159,24 +181,61 @@ public class PlayerHandler extends Thread{
                 break;
             }
 
-            try {
-                message = (Message) in.readObject();
-                if(message != null){
-                    System.out.println(message.getText());
-                    if(message.getText().contains("ready")){
-                        this.isReady = true;
-                        break;
-                    }
-                    server.broadcast(message.getText(),this);
-                }
-            } catch (ClassNotFoundException | IOException c){
-                c.printStackTrace();
+
+            message = getMessage();
+            System.out.println(message.getText());
+            if(message.getText().contains("ready")) {
+                this.isReady = true;
+                break;
             }
+            server.broadcast(message.getText(),this);
         }
     }
 
+    private void vote(){
+        System.out.println("entered vote in handler");
 
-    private void waitPlayer(){
+        sendMessage("vote time\nfollowing players are alive\nwrite the name to vote or write \"none\"");
+
+        System.out.println("sent to client");
+
+        String alivePlayers = server.getList();
+        sendMessage(alivePlayers);
+
+        System.out.println("alive players sent");
+
+        message = null;
+        while (message == null){
+            try {
+                message =(Message)in.readObject();
+            } catch (IOException | ClassNotFoundException io){
+                io.printStackTrace();
+            }
+        }
+
+        String target = message.getText();
+        while (!(server.acceptableVote(target))){
+            sendMessage("unacceptable try again");
+            message = null;
+            while (message == null){
+                try {
+                    message =(Message)in.readObject();
+                } catch (IOException | ClassNotFoundException io){
+                    io.printStackTrace();
+                }
+            }
+            target = message.getText();
+        }
+
+        sendMessage("accepted");
+        waitPlayer();
+        System.out.println("second notified");
+        server.gatherVotes(target,this);
+
+
+    }
+
+    public void waitPlayer(){
         try {
             synchronized (this){
                 this.wait();

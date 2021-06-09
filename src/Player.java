@@ -10,6 +10,7 @@ public class Player {
     private int port;
     private String name;
     private Role role;
+    private boolean isAwake;
 
     Scanner scanner = new Scanner(System.in);
 
@@ -18,8 +19,6 @@ public class Player {
     }
 
 
-    ReadThread readThread ;
-    WriteThread writeThread ;
 
     public void start() {
         try {
@@ -29,8 +28,6 @@ public class Player {
             out = new ObjectOutputStream(socket.getOutputStream());
             in = new ObjectInputStream(socket.getInputStream());
 
-            readThread = new ReadThread(in,this);
-            writeThread = new WriteThread(out,this);
 
             handleName();
 
@@ -40,9 +37,11 @@ public class Player {
 
             handleIntroduction();
 
-            startThreads();
-
             handleChat();
+
+            sleepPlayer(5000);
+
+            handleVote();
 
 
         } catch (UnknownHostException u) {
@@ -56,61 +55,65 @@ public class Player {
 
     Message message = null;
     String msg = "";
-    private void handleName(){
-        try{
-            while (true){
-                message = (Message) in.readObject();
-                while (message == null)
-                    message = (Message) in.readObject();
-                msg = message.getText();
-                System.out.println(msg);
 
-                String pName = null;
-                while (pName == null || pName.length() < 1)
-                    pName = scanner.nextLine();
-                out.writeObject(new Message(pName));
-
+    private Message getMessage(){
+        message = null;
+        while (message == null){
+            try {
                 message = (Message) in.readObject();
-                msg = message.getText();
-                System.out.println(msg);
-                if(msg.startsWith("welcome"))
-                {
-                    this.name = pName;
-                    break;
-                }
+            } catch (IOException | ClassNotFoundException e){
+                e.printStackTrace();
             }
+        }
+        return message;
+    }
+
+    private void sendMessage(String msg){
+        try {
+            out.writeObject(new Message(msg));
         } catch (IOException e) {
-            e.printStackTrace();
-        } catch (ClassNotFoundException e) {
             e.printStackTrace();
         }
     }
 
-    private void handleReady(){
+    private void handleName(){
+        while (true){
+            message = getMessage();
+            msg = message.getText();
+            System.out.println(msg);
 
-        try{
-            while (true){
-                message = (Message) in.readObject();
-                while (message == null)
-                    message = (Message) in.readObject();
-                msg = message.getText();
-                System.out.println(msg);
+            String pName = null;
+            while (pName == null || pName.length() < 1)
+                pName = scanner.nextLine();
+            sendMessage(pName);
 
-                while (!(msg.equalsIgnoreCase("ready"))){
-                    msg = scanner.nextLine();
-                    out.writeObject(new Message(msg));
-                }
-
-                message = (Message) in.readObject();
-                msg = message.getText();
-                System.out.println(msg);
-                if(msg.startsWith("ok wait"))
-                    break;
+            message = getMessage();
+            msg = message.getText();
+            System.out.println(msg);
+            if(msg.startsWith("welcome"))
+            {
+                this.name = pName;
+                break;
             }
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (ClassNotFoundException e) {
-            e.printStackTrace();
+        }
+    }
+
+    private void handleReady(){
+        while (true){
+            message = getMessage();
+            msg = message.getText();
+            System.out.println(msg);
+
+            while (!(msg.equalsIgnoreCase("ready"))){
+                msg = scanner.nextLine();
+                sendMessage(msg);
+            }
+
+            message = getMessage();
+            msg = message.getText();
+            System.out.println(msg);
+            if(msg.startsWith("ok wait"))
+                break;
         }
     }
 
@@ -127,52 +130,97 @@ public class Player {
         }
         setRole(r);
 
-        try {
-            message = (Message) in.readObject();
-            msg = message.getText();
-            System.out.println(msg);
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (ClassNotFoundException e) {
-            e.printStackTrace();
-        }
+        System.out.println("your role is " + role.toString() +"\n");
+
     }
 
     private void handleIntroduction(){
         if(role instanceof Mafia || role instanceof Mayor){
-            message = null;
-            while (message == null){
-                try {
-                    message = (Message) in.readObject();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                    break;
-                } catch (ClassNotFoundException e) {
-                    e.printStackTrace();
-                    break;
-                }
-            } msg = message.getText();
+            message = getMessage();
+            msg = message.getText();
             System.out.println(msg);
         }
     }
 
-    private void startThreads() {
-        writeThread.start();
-        readThread.start();
-    }
-
     private void handleChat() {
-        while (readThread.getState() != Thread.State.WAITING && readThread.getState() != Thread.State.TIMED_WAITING)
-            continue;
-        if(writeThread.getState() != Thread.State.WAITING && writeThread.getState() != Thread.State.TIMED_WAITING){
-            try {
-                synchronized (writeThread){
-                    writeThread.wait();
+
+        this.isAwake = true;
+
+        class Reader extends Thread{
+            @Override
+            public void run() {
+                while (isAwake)
+                {
+                    message = getMessage();
+                    String msg = message.getText();
+                    System.out.println(msg);
+                    if(msg.contains("chat time over"))
+                        return;
                 }
-            } catch (InterruptedException inter){
-                inter.printStackTrace();
             }
         }
+
+
+        class Writer extends Thread{
+            @Override
+            public void run() {
+                while (true){
+                    msg = scanner.nextLine();
+                    if(msg.equalsIgnoreCase("ready"))
+                    {
+                        msg = name + ": " + msg;
+                        sendMessage(msg);
+                        return;
+                    }else {
+                        msg = name + ": " + msg;
+                        sendMessage(msg);
+                    }
+                }
+            }
+        }
+
+        Reader reader = new Reader();
+        Writer writer = new Writer();
+
+        reader.start();
+        writer.start();
+
+        while (reader.isAlive())
+        {}
+        if(writer.isAlive())
+            writer.interrupt();
+
+    }
+
+    private void handleVote(){
+
+        System.out.println("entered vote in player");
+
+        message = getMessage();
+        msg = message.getText();
+        System.out.println(msg);
+
+
+        message = getMessage();
+        msg = message.getText();
+        System.out.println(msg);
+
+
+        System.out.println("enter your target");
+        String target = scanner.next();
+        sendMessage(target);
+
+        message = getMessage();
+        while (message.getText().startsWith("unacceptable")){
+            System.out.println(message.getText());
+            target = scanner.next();
+            sendMessage(target);
+
+            message = getMessage();
+        }
+
+        if(message.getText().equals("accepted"))
+            System.out.println(message.getText());
     }
 
     public void setRole(Role role) {
@@ -191,8 +239,12 @@ public class Player {
         return port;
     }
 
-    public String getName() {
-        return name;
+    private void sleepPlayer(int millis){
+        try{
+            Thread.sleep(millis);
+        } catch (InterruptedException inter){
+            inter.printStackTrace();
+        }
     }
 
     public static void main(String[] args) {

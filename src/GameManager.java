@@ -39,12 +39,40 @@ public class GameManager extends Thread {
         chat();
 
         votes();
+
+        night();
     }
 
     private void votes(){
+        System.out.println("entered vote in manager");
+        while (!allWaiting()) { }
+
+        if (allWaiting())
+            System.out.println("all waiting");
+
+        notifyPlayers();
+
+        Timer timer = new Timer();
+
+        TimerTask timerTask = new TimerTask() {
+            @Override
+            public void run() {
+                System.out.println("timer finished");
+                if(allWaiting()){
+                    System.out.println("all waiting again");
+                    notifyPlayers();
+                }
+                else
+                    System.out.println("no waiting");
+               // System.out.println("sending votes to players");
+            }
+        };
+        timer.schedule(timerTask,60 * 1000);
+    }
+
+    private void night(){
         while (!allWaiting())
             sleepGame(500);
-        System.out.println("vote");
     }
 
     private void notifyPlayers(){
@@ -60,7 +88,7 @@ public class GameManager extends Thread {
         boolean waiting = true;
         for(PlayerHandler player : players){
             synchronized (player){
-                if(player.getState() != State.WAITING && player.getState() != State.TIMED_WAITING){
+                if(player.getState() != State.WAITING){
                     waiting = false;
                     break;
                 }
@@ -171,10 +199,12 @@ public class GameManager extends Thread {
         }
     }
 
+
+    private boolean exitChat = false;
     private void chat(){
 
         while (!(allWaiting())){
-            sleepGame(500);
+
         }
         notifyPlayers();
 
@@ -185,11 +215,11 @@ public class GameManager extends Thread {
                 endChat1();
             }
         };
-        timer.schedule(timerTask,2*60*1000);
+        timer.schedule(timerTask,60*1000);
 
         while (!server.allReady())
             sleepGame(500);
-        if (server.allReady()){
+        if (server.allReady() && !exitChat){
             timer.cancel();
             endChat2();
         }
@@ -200,12 +230,16 @@ public class GameManager extends Thread {
         System.out.println("chat is over");
         for(PlayerHandler player : players)
             player.setMsg("chat time over");
+        this.exitChat = true;
     }
 
     private void endChat2(){
         System.out.println("chat is over");
-        for(PlayerHandler player : players)
+        for(PlayerHandler player : players){
             player.sendMessage("chat time over");
+            player.waitPlayer();
+        }
+        this.exitChat = true;
     }
 
     private void sleepGame( int millis){

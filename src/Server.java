@@ -65,11 +65,20 @@ public class Server {
     }
 
     public void broadcast(String msg, PlayerHandler playerHandler) {
-        for(PlayerHandler p: playerHandlers)
-        {
-            if(playerHandler != p)
-                p.sendMessage(msg);
+
+        String[] msgParts = msg.split(":",2);
+        if(msgParts[1].length() > 1){
+            for(PlayerHandler p: playerHandlers)
+            {
+                if(playerHandler != p)
+                    p.sendMessage(msg);
+            }
         }
+    }
+
+    public void broadcast(String msg){
+        for(PlayerHandler p: playerHandlers)
+            p.sendMessage(msg);
     }
 
     public boolean allReady(){
@@ -99,6 +108,43 @@ public class Server {
 
     public void addNewName(String name){
         playerNames.add(name);
+    }
+
+    public String getList(){
+        String playerList = "";
+        for (PlayerHandler player : playerHandlers){
+            if(player.playerIsAlive())
+                playerList += player.getPlayerName() + "\n";
+        }
+        return playerList;
+    }
+
+    public boolean acceptableVote(String name){
+        for (PlayerHandler player : playerHandlers){
+            if(name.equalsIgnoreCase(player.getPlayerName()) && player.playerIsAlive())
+                return true;
+        }
+        return false;
+    }
+
+    private int numberOfAlivePlayers(){
+        int number = 0;
+        for(PlayerHandler player : playerHandlers){
+            if(player.playerIsAlive())
+                number++;
+        }
+        return number;
+    }
+
+    String votes = "";
+    public void gatherVotes(String target, PlayerHandler player){
+        int counter = 0;
+        votes += player.getPlayerName() + " --> " + target + "\n";
+        counter++;
+        if(counter == numberOfAlivePlayers()){
+            broadcast(votes);
+            votes = "";
+        }
     }
 
     public static void main(String[] args) {
