@@ -39,9 +39,7 @@ public class Player {
 
             handleChat();
 
-            sleepPlayer(5000);
-
-            handleVote();
+            //handleVote();
 
 
         } catch (UnknownHostException u) {
@@ -194,8 +192,7 @@ public class Player {
 
     private void handleVote(){
 
-        System.out.println("entered vote in player");
-
+        System.out.println("entered in vote");
         message = getMessage();
         msg = message.getText();
         System.out.println(msg);
@@ -206,9 +203,11 @@ public class Player {
         System.out.println(msg);
 
 
+        scanner.nextLine();
         System.out.println("enter your target");
-        String target = scanner.next();
+        String target = scanner.nextLine();
         sendMessage(target);
+        System.out.println("target sent");
 
         message = getMessage();
         while (message.getText().startsWith("unacceptable")){

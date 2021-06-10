@@ -4,6 +4,7 @@ import java.net.Socket;
 import java.util.ArrayList;
 import java.util.Scanner;
 import java.util.Vector;
+import java.util.concurrent.ExecutorService;
 
 
 public class Server {
@@ -121,7 +122,7 @@ public class Server {
 
     public boolean acceptableVote(String name){
         for (PlayerHandler player : playerHandlers){
-            if(name.equalsIgnoreCase(player.getPlayerName()) && player.playerIsAlive())
+            if((name.equalsIgnoreCase(player.getPlayerName()) && player.playerIsAlive()) || name.equalsIgnoreCase("none"))
                 return true;
         }
         return false;

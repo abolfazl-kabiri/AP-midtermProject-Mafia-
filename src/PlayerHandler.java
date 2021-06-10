@@ -11,8 +11,8 @@ public class PlayerHandler extends Thread{
     private ObjectInputStream in;
     private ObjectOutputStream out;
     private boolean isAwake;
-    private boolean chatTime;
     private boolean isAlive;
+    private Thread chat;
 
 
     public PlayerHandler( Server server,Socket socket) {
@@ -33,16 +33,12 @@ public class PlayerHandler extends Thread{
         return isAlive;
    }
 
-    public void setAlive(boolean alive) {
-        isAlive = alive;
-    }
-
     public boolean isReady() {
         return isReady;
     }
 
-    public void setReady(boolean ready) {
-        isReady = ready;
+    public void setReady(boolean ready){
+        this.isReady = ready;
     }
 
     public void setPlayerName(String playerName) {
@@ -72,10 +68,7 @@ public class PlayerHandler extends Thread{
        waitPlayer();
 
        handleChatTime();
-
-       waitForAll();
-       waitPlayer();
-       System.out.println("woke up\n");
+        System.out.println("out of chat in handler");
 
        vote();
 
@@ -166,64 +159,66 @@ public class PlayerHandler extends Thread{
         }
     }
 
-    private void handleChatTime(){
+
+    public void handleChatTime(){
         sendMessage("It is day\nyou can chat for 5 minutes or you can send \"ready\" to stop sending");
 
-        this.isReady = false;
-        msg = null;
-        this.chatTime = true;
-        while (chatTime){
+        isReady = false;
 
-            if(msg != null){
-                sendMessage(msg);
-                chatTime = false;
-                this.isReady = true;
-                break;
+        class ChatHandler extends Thread{
+
+            private Message getMessage(){
+                message = null;
+                while (message == null){
+                    try {
+                        message = (Message) in.readObject();
+                    } catch (IOException | ClassNotFoundException e){
+                        e.printStackTrace();
+                    }
+                }
+                return message;
             }
 
 
-            message = getMessage();
-            System.out.println(message.getText());
-            if(message.getText().contains("ready")) {
-                this.isReady = true;
-                break;
+            @Override
+            public void run() {
+                while (!chat.isInterrupted()){
+                    message = getMessage();
+                    msg = message.getText();
+//                    String [] msgToken = msg.split(":",2);
+//                    if(msgToken[1].length() == 6 && msgToken[1].contains("ready")){
+//                        isReady = true;
+//                        return;
+//                    }
+                    server.broadcast(msg);
+                }
+                return;
             }
-            server.broadcast(message.getText(),this);
         }
+
+        chat = new ChatHandler();
+
+        chat.start();
+        waitPlayer();
+    }
+
+    public Thread getChat(){
+        return chat;
     }
 
     private void vote(){
-        System.out.println("entered vote in handler");
-
         sendMessage("vote time\nfollowing players are alive\nwrite the name to vote or write \"none\"");
-
-        System.out.println("sent to client");
 
         String alivePlayers = server.getList();
         sendMessage(alivePlayers);
 
-        System.out.println("alive players sent");
 
-        message = null;
-        while (message == null){
-            try {
-                message =(Message)in.readObject();
-            } catch (IOException | ClassNotFoundException io){
-                io.printStackTrace();
-            }
-        }
-
+        message = getMessage();
         String target = message.getText();
         while (!(server.acceptableVote(target))){
             sendMessage("unacceptable try again");
-            message = null;
-            while (message == null){
-                try {
-                    message =(Message)in.readObject();
-                } catch (IOException | ClassNotFoundException io){
-                    io.printStackTrace();
-                }
-            }
+
+            message = getMessage();
             target = message.getText();
         }
 

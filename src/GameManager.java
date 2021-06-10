@@ -1,4 +1,6 @@
 import java.util.*;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class GameManager extends Thread {
 
@@ -37,6 +39,9 @@ public class GameManager extends Thread {
         sleepGame(2000);
 
         chat();
+        System.out.println("out of chat in game");
+
+        sleepGame(2000);
 
         votes();
 
@@ -44,13 +49,11 @@ public class GameManager extends Thread {
     }
 
     private void votes(){
-        System.out.println("entered vote in manager");
+
         while (!allWaiting()) { }
 
-        if (allWaiting())
-            System.out.println("all waiting");
-
         notifyPlayers();
+        System.out.println("notified");
 
         Timer timer = new Timer();
 
@@ -203,44 +206,39 @@ public class GameManager extends Thread {
     private boolean exitChat = false;
     private void chat(){
 
-        while (!(allWaiting())){
-
-        }
+        while (!(allWaiting())){ }
         notifyPlayers();
 
         Timer timer = new Timer();
         TimerTask timerTask = new TimerTask() {
             @Override
             public void run() {
-                endChat1();
+                endChat();
             }
         };
-        timer.schedule(timerTask,60*1000);
+        timer.schedule(timerTask,20*1000);
 
-        while (!server.allReady())
-            sleepGame(500);
+        while (!server.allReady()) {}
+
         if (server.allReady() && !exitChat){
             timer.cancel();
-            endChat2();
+            endChat();
         }
 
     }
 
-    private void endChat1(){
+    private void endChat(){
         System.out.println("chat is over");
-        for(PlayerHandler player : players)
-            player.setMsg("chat time over");
-        this.exitChat = true;
-    }
 
-    private void endChat2(){
-        System.out.println("chat is over");
         for(PlayerHandler player : players){
+            //kill chat thread of player threads
+            player.getChat().interrupt();
             player.sendMessage("chat time over");
-            player.waitPlayer();
+            player.setReady(true);
         }
         this.exitChat = true;
     }
+
 
     private void sleepGame( int millis){
         try {
