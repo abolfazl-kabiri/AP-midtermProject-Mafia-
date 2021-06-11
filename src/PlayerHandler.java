@@ -220,6 +220,21 @@ public class PlayerHandler extends Thread{
         System.out.println("woke up");
         //after this result of voting should be sent to players
 
+        // sleep is needed here for Enters
+
+        try {
+            Thread.sleep(8000);
+        }catch (InterruptedException inter){
+            inter.printStackTrace();
+        }
+
+
+        msg = server.gatherVotes();
+        sendMessage(msg);
+
+        if(! (playerRole instanceof Mayor)){
+            sendMessage("wait for mayor");
+        }
 
     }
 

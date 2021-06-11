@@ -108,8 +108,6 @@ public class Server {
         return playerList;
     }
 
-
-    //this method should be checked
     public boolean acceptableVote(String target, String playerName){
 
         if(target.equals(playerName))
@@ -149,17 +147,16 @@ public class Server {
         }
         return number;
     }
-
-//    String votes = "";
-//    public void gatherVotes(String target, PlayerHandler player){
-//        int counter = 0;
-//        votes += player.getPlayerName() + " --> " + target + "\n";
-//        counter++;
-//        if(counter == numberOfAlivePlayers()){
-//            broadcast(votes);
-//            votes = "";
-//        }
-//    }
+    
+    public String gatherVotes(){
+        String voteResult = "";
+        Iterator<Map.Entry<String, String>> iterator = votes.entrySet().iterator();
+        while (iterator.hasNext()){
+            Map.Entry<String, String> entry = iterator.next();
+            voteResult += entry.getKey() + " --> " + entry.getValue() + "\n";
+        }
+        return voteResult;
+    }
 
     public static void main(String[] args) {
         Server server = new Server();
