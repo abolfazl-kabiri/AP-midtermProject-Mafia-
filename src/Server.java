@@ -1,9 +1,7 @@
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.ArrayList;
-import java.util.Scanner;
-import java.util.Vector;
+import java.util.*;
 import java.util.concurrent.ExecutorService;
 
 
@@ -13,11 +11,13 @@ public class Server {
     private Vector<PlayerHandler> playerHandlers;
     private ArrayList<String> playerNames;
     private int port;
+    private HashMap<String,String> votes;
 
     public Server() {
         playerHandlers = new Vector<>();
         playerNames = new ArrayList<>();
         port = 2022;
+        votes = new HashMap<>();
     }
 
     Scanner scanner = new Scanner(System.in);
@@ -65,18 +65,6 @@ public class Server {
         }
     }
 
-    public void broadcast(String msg, PlayerHandler playerHandler) {
-
-        String[] msgParts = msg.split(":",2);
-        if(msgParts[1].length() > 1){
-            for(PlayerHandler p: playerHandlers)
-            {
-                if(playerHandler != p)
-                    p.sendMessage(msg);
-            }
-        }
-    }
-
     public void broadcast(String msg){
         for(PlayerHandler p: playerHandlers)
             p.sendMessage(msg);
@@ -120,12 +108,37 @@ public class Server {
         return playerList;
     }
 
-    public boolean acceptableVote(String name){
+
+    //this method should be checked
+    public boolean acceptableVote(String target, String playerName){
+
+        if(target.equals(playerName))
+            return false;
+
         for (PlayerHandler player : playerHandlers){
-            if((name.equalsIgnoreCase(player.getPlayerName()) && player.playerIsAlive()) || name.equalsIgnoreCase("none"))
+            if((target.equalsIgnoreCase(player.getPlayerName()) && player.playerIsAlive())){
                 return true;
+            }
         }
         return false;
+    }
+
+    public void storeVotes(String playerName, String target){
+        boolean votedBefore = false;
+
+        Iterator<Map.Entry<String, String>> iterator = votes.entrySet().iterator();
+        while (iterator.hasNext()){
+            Map.Entry<String, String> entry = iterator.next();
+            if(playerName.equals(entry.getKey())){
+                votedBefore = true;
+                break;
+            }
+        }
+
+        if(votedBefore)
+            votes.replace(playerName,target);
+        else
+            votes.put(playerName,target);
     }
 
     private int numberOfAlivePlayers(){
@@ -137,16 +150,16 @@ public class Server {
         return number;
     }
 
-    String votes = "";
-    public void gatherVotes(String target, PlayerHandler player){
-        int counter = 0;
-        votes += player.getPlayerName() + " --> " + target + "\n";
-        counter++;
-        if(counter == numberOfAlivePlayers()){
-            broadcast(votes);
-            votes = "";
-        }
-    }
+//    String votes = "";
+//    public void gatherVotes(String target, PlayerHandler player){
+//        int counter = 0;
+//        votes += player.getPlayerName() + " --> " + target + "\n";
+//        counter++;
+//        if(counter == numberOfAlivePlayers()){
+//            broadcast(votes);
+//            votes = "";
+//        }
+//    }
 
     public static void main(String[] args) {
         Server server = new Server();

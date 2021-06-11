@@ -13,6 +13,7 @@ public class PlayerHandler extends Thread{
     private boolean isAwake;
     private boolean isAlive;
     private Thread chat;
+    private Thread vote;
 
 
     public PlayerHandler( Server server,Socket socket) {
@@ -28,31 +29,6 @@ public class PlayerHandler extends Thread{
         isAlive = true;
     }
 
-
-   public boolean playerIsAlive(){
-        return isAlive;
-   }
-
-    public boolean isReady() {
-        return isReady;
-    }
-
-    public void setReady(boolean ready){
-        this.isReady = ready;
-    }
-
-    public void setPlayerName(String playerName) {
-        this.playerName = playerName;
-    }
-
-    public void setPlayerRole(Role playerRole) {
-        this.playerRole = playerRole;
-    }
-
-    public Role getPlayerRole() {
-        return playerRole;
-    }
-
     String msg = "";
     Message message = null;
 
@@ -63,14 +39,15 @@ public class PlayerHandler extends Thread{
 
         handleRole();
 
-       handleIntroduction();
+        handleIntroduction();
 
-       waitPlayer();
+        waitPlayer();
 
-       handleChatTime();
-        System.out.println("out of chat in handler");
+        handleChatTime();
 
-       vote();
+        waitPlayer();
+
+        vote();
 
 
 
@@ -86,21 +63,6 @@ public class PlayerHandler extends Thread{
             }
         }
         return message;
-    }
-
-    private void sleep(int millis){
-        try {
-            Thread.sleep(millis);
-        } catch (InterruptedException inter){
-            inter.printStackTrace();
-        }
-    }
-
-    private void waitForAll(){
-        while (!(server.allReady())){
-            sleep(500);
-        }
-        sleep(2000);
     }
 
     public String getPlayerName() {
@@ -160,7 +122,9 @@ public class PlayerHandler extends Thread{
     }
 
 
+    boolean chatTime;
     public void handleChatTime(){
+        chatTime = true;
         sendMessage("It is day\nyou can chat for 5 minutes or you can send \"ready\" to stop sending");
 
         isReady = false;
@@ -182,9 +146,10 @@ public class PlayerHandler extends Thread{
 
             @Override
             public void run() {
-                while (!chat.isInterrupted()){
+                while (chatTime){
                     message = getMessage();
                     msg = message.getText();
+                    System.out.println(msg);
 //                    String [] msgToken = msg.split(":",2);
 //                    if(msgToken[1].length() == 6 && msgToken[1].contains("ready")){
 //                        isReady = true;
@@ -192,40 +157,68 @@ public class PlayerHandler extends Thread{
 //                    }
                     server.broadcast(msg);
                 }
+                setReady(true);
                 return;
+
             }
         }
 
         chat = new ChatHandler();
 
         chat.start();
-        waitPlayer();
     }
 
-    public Thread getChat(){
-        return chat;
-    }
 
+    boolean voteTime;
     private void vote(){
-        sendMessage("vote time\nfollowing players are alive\nwrite the name to vote or write \"none\"");
+        voteTime = true;
+        sendMessage("vote time\nyou have 30 seconds\nfollowing players are alive\nwrite the name to vote");
 
         String alivePlayers = server.getList();
         sendMessage(alivePlayers);
 
 
-        message = getMessage();
-        String target = message.getText();
-        while (!(server.acceptableVote(target))){
-            sendMessage("unacceptable try again");
+        class VoteHandler extends Thread{
 
-            message = getMessage();
-            target = message.getText();
+            private Message getMessage(){
+                message = null;
+                while (message == null){
+                    try {
+                        message = (Message) in.readObject();
+                    } catch (IOException | ClassNotFoundException e){
+                        e.printStackTrace();
+                    }
+                }
+                return message;
+            }
+
+            @Override
+            public void run() {
+                String target;
+                while (voteTime){
+                    message = getMessage();
+                    target = message.getText();
+                    String[] targetTokens = target.split(" ",2);
+                    target = targetTokens[1].trim();
+
+                    if(server.acceptableVote(target, playerName)){
+                        sendMessage("accepted");
+                        server.storeVotes(playerName,target);
+                    }
+                    else
+                        sendMessage("unacceptable try again");
+                }
+                System.out.println("vote thread is gonna be finished");
+                return;
+            }
         }
 
-        sendMessage("accepted");
+        vote = new VoteHandler();
+        vote.start();
+
         waitPlayer();
-        System.out.println("second notified");
-        server.gatherVotes(target,this);
+        System.out.println("woke up");
+        //after this result of voting should be sent to players
 
 
     }
@@ -267,5 +260,29 @@ public class PlayerHandler extends Thread{
         } catch (IOException io){
             io.printStackTrace();
         }
+    }
+
+    public boolean playerIsAlive(){
+        return isAlive;
+    }
+
+    public boolean isReady() {
+        return isReady;
+    }
+
+    public void setReady(boolean ready){
+        this.isReady = ready;
+    }
+
+    public void setPlayerName(String playerName) {
+        this.playerName = playerName;
+    }
+
+    public void setPlayerRole(Role playerRole) {
+        this.playerRole = playerRole;
+    }
+
+    public Role getPlayerRole() {
+        return playerRole;
     }
 }
