@@ -65,8 +65,13 @@ public class Player {
                 message = getMessage();
                 String msg = message.getText();
                 System.out.println(msg);
-//                if(msg.equalsIgnoreCase("chat time over"))
-//                    sendMessage(" ");
+                if(msg.equalsIgnoreCase("chat time over")){
+                    sendMessage("finish");
+                }
+
+                if(msg.equals("vote time is over"))
+                    sendMessage("finish");
+
                 if(msg.startsWith("you are out")){
                     writer.interrupt();
                 }

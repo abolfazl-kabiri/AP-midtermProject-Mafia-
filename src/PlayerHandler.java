@@ -155,11 +155,11 @@ public class PlayerHandler extends Thread{
                     message = getMessage();
                     msg = message.getText();
                     System.out.println(msg);
-//                    String [] msgToken = msg.split(":",2);
-//                    if(msgToken[1].length() == 6 && msgToken[1].contains("ready")){
-//                        isReady = true;
-//                        return;
-//                    }
+                    String [] msgToken = msg.split(" ",2);
+                    if(msgToken.length > 1 && msgToken[1].equalsIgnoreCase("ready")){
+                        isReady = true;
+                        return;
+                    }
                     server.broadcast(msg);
                 }
                 setReady(true);
@@ -204,9 +204,13 @@ public class PlayerHandler extends Thread{
                     message = getMessage();
                     target = message.getText();
                     String[] targetTokens = target.split(" ",2);
-                    target = targetTokens[1].trim();
+                    if(targetTokens.length > 1)
+                        target = targetTokens[1].trim();
 
-                    if(server.acceptableVote(target, playerName)){
+                    if(target.equals("finish"))
+                    { }
+
+                    else if(server.acceptableVote(target, playerName)){
                         sendMessage("accepted");
                         server.storeVotes(playerName,target);
                     }
@@ -241,10 +245,13 @@ public class PlayerHandler extends Thread{
         if(!(playerRole instanceof Mayor)){
             sendMessage("wait for mayor");
             waitPlayer();
-        } else {
+        } else if(playerIsAlive()){
            msg = playerRole.action(out,in,server);
            server.mayorResponse(msg);
            waitPlayer();
+        } else{
+            server.mayorResponse("yes");
+            waitPlayer();
         }
         try {
             Thread.sleep(4500);

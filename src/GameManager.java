@@ -4,8 +4,6 @@ import java.util.*;
 public class GameManager extends Thread {
 
    private Vector<PlayerHandler> players;
-   private Vector<PlayerHandler> mafias;
-   private Vector<PlayerHandler> citizens;
    private int numberOfPlayers;
    private int numberOfMafias;
    private int numberOfCitizens;
@@ -16,15 +14,11 @@ public class GameManager extends Thread {
     public GameManager(Vector<PlayerHandler> players, int numberOfPlayers, Server server) {
         this.players = players;
         this.server = server;
-        mafias = new Vector<>();
-        citizens = new Vector<>();
         this.numberOfPlayers = numberOfPlayers;
         numberOfMafias = numberOfPlayers / 3;
         numberOfCitizens = numberOfPlayers - numberOfMafias;
         roles = new ArrayList<>();
         createRoles();
-        identifyCitizens();
-        identifyMafias();
     }
 
     public void run(){
@@ -124,20 +118,6 @@ public class GameManager extends Thread {
             }
         }
         return waiting;
-    }
-
-    private void identifyMafias(){
-        for(PlayerHandler player: players) {
-            if (player.getPlayerRole() instanceof Mafia)
-                mafias.add(player);
-        }
-    }
-
-    private void identifyCitizens(){
-        for(PlayerHandler player: players) {
-            if (player.getPlayerRole() instanceof Citizen)
-                citizens.add(player);
-        }
     }
 
     private void createMafiaRoles(){
@@ -243,7 +223,7 @@ public class GameManager extends Thread {
                 endChat();
             }
         };
-        timer.schedule(timerTask,20*1000);
+        timer.schedule(timerTask,60*1000);
 
         while (!server.allReady()) {}
 
@@ -259,8 +239,8 @@ public class GameManager extends Thread {
 
         for(PlayerHandler player : players){
             //kill chat thread of player threads
-            player.chatTime = false;
             player.sendMessage("chat time over");
+            player.chatTime = false;
         }
         this.exitChat = true;
     }
