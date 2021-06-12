@@ -147,7 +147,7 @@ public class Server {
         }
         return number;
     }
-    
+
     public String gatherVotes(){
         String voteResult = "";
         Iterator<Map.Entry<String, String>> iterator = votes.entrySet().iterator();
@@ -156,6 +156,44 @@ public class Server {
             voteResult += entry.getKey() + " --> " + entry.getValue() + "\n";
         }
         return voteResult;
+    }
+
+    //in this method
+    //we create a hashMap with player names keys
+    //and the values are number of repeatation of each key
+    public String findVictim(){
+        int maximumRepeat = 0;
+        String victim = "";
+        ArrayList<String> victims = new ArrayList<>();
+        HashMap<String, Integer> voteNumber = new HashMap<>();
+        for(PlayerHandler player : playerHandlers){
+            int counter = 0;
+            Iterator<Map.Entry<String, String>> iterator = votes.entrySet().iterator();
+            while (iterator.hasNext()){
+                Map.Entry<String, String> entry = iterator.next();
+                if(entry.getValue().equalsIgnoreCase(player.getPlayerName()))
+                    counter++;
+            }
+            if(counter > maximumRepeat)
+                maximumRepeat = counter;
+            voteNumber.put(player.getPlayerName(), counter);
+        }
+
+        for(Map.Entry<String, Integer> entry : voteNumber.entrySet()){
+            if(entry.getValue() == maximumRepeat)
+                victims.add(entry.getKey());
+        }
+
+        if(victims.size() == 1)
+            victim = victims.get(0);
+        else{
+            Random random = new Random();
+            int randomKill = random.nextInt(victims.size() - 1);
+            victim = victims.get(randomKill);
+        }
+
+
+        return victim;
     }
 
     public static void main(String[] args) {

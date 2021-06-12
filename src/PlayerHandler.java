@@ -232,6 +232,9 @@ public class PlayerHandler extends Thread{
         msg = server.gatherVotes();
         sendMessage(msg);
 
+        msg = server.findVictim();
+        sendMessage(msg +  " is the victim");
+
         if(! (playerRole instanceof Mayor)){
             sendMessage("wait for mayor");
         }
