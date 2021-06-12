@@ -161,9 +161,9 @@ public class Server {
     //in this method
     //we create a hashMap with player names keys
     //and the values are number of repeatation of each key
-    public String findVictim(){
+    private String victim = "";
+    public void findVictim(){
         int maximumRepeat = 0;
-        String victim = "";
         ArrayList<String> victims = new ArrayList<>();
         HashMap<String, Integer> voteNumber = new HashMap<>();
         for(PlayerHandler player : playerHandlers){
@@ -185,15 +185,41 @@ public class Server {
         }
 
         if(victims.size() == 1)
-            victim = victims.get(0);
+           this.victim = victims.get(0);
         else{
             Random random = new Random();
             int randomKill = random.nextInt(victims.size() - 1);
-            victim = victims.get(randomKill);
+            this.victim = victims.get(randomKill);
         }
 
+        votes.clear();
+    }
 
+    public String getVictim() {
         return victim;
+    }
+
+    public PlayerHandler findHandler(String name){
+        PlayerHandler playerHandler = null;
+        for (PlayerHandler player : playerHandlers){
+            if(player.getPlayerName().equals(name))
+                playerHandler = player;
+            break;
+        }
+        return playerHandler;
+    }
+
+    public void removePlayer(PlayerHandler player){
+        System.out.println("removed");
+    }
+
+    public void mayorResponse(String response){
+        if(response.equals("yes")){
+            PlayerHandler player = findHandler(victim);
+            removePlayer(player);
+        }else{
+            System.out.println("voting canceled");
+        }
     }
 
     public static void main(String[] args) {

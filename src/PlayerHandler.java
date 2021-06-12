@@ -208,7 +208,6 @@ public class PlayerHandler extends Thread{
                     else
                         sendMessage("unacceptable try again");
                 }
-                System.out.println("vote thread is gonna be finished");
                 return;
             }
         }
@@ -217,26 +216,34 @@ public class PlayerHandler extends Thread{
         vote.start();
 
         waitPlayer();
-        System.out.println("woke up");
-        //after this result of voting should be sent to players
-
-        // sleep is needed here for Enters
-
         try {
             Thread.sleep(8000);
         }catch (InterruptedException inter){
             inter.printStackTrace();
         }
+        System.out.println("woke up");
+        //after this result of voting should be sent to players
+
 
 
         msg = server.gatherVotes();
         sendMessage(msg);
 
-        msg = server.findVictim();
+        // here i need a new wait
+
+        waitPlayer();
+        System.out.println("notified");
+
+        msg = server.getVictim();
         sendMessage(msg +  " is the victim");
 
-        if(! (playerRole instanceof Mayor)){
+        if(!(playerRole instanceof Mayor)){
             sendMessage("wait for mayor");
+            waitPlayer();
+        } else {
+           msg = playerRole.action(out,in,server);
+           server.mayorResponse(msg);
+           waitPlayer();
         }
 
     }

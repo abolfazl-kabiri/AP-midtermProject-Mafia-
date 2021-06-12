@@ -1,6 +1,5 @@
 import java.util.*;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+
 
 public class GameManager extends Thread {
 
@@ -47,7 +46,12 @@ public class GameManager extends Thread {
         night();
     }
 
+
+    boolean outOfVote = false;
     private void votes(){
+
+        outOfVote = false;
+
 
         while (!allWaiting()) { }
 
@@ -56,22 +60,37 @@ public class GameManager extends Thread {
         Timer timer = new Timer();
 
         TimerTask timerTask = new TimerTask() {
+
             @Override
             public void run() {
-                System.out.println("vote time finished");
-                for (PlayerHandler player : players){
-                    player.voteTime = false;
-                    player.sendMessage("vote time is over");
-                }
-
-               while (!allWaiting())
-               {}
-
-               notifyPlayers();
-
+                endVote();
             }
         };
-        timer.schedule(timerTask,60 * 1000);
+        timer.schedule(timerTask,30 * 1000);
+
+
+        while (!(allWaiting() && outOfVote))
+        {}
+        System.out.println("all waiting");
+
+        server.findVictim();
+        sleepGame(2000);
+        notifyPlayers();
+    }
+
+    private void endVote(){
+        System.out.println("vote time finished");
+        for (PlayerHandler player : players){
+            player.voteTime = false;
+            player.sendMessage("vote time is over");
+
+        }
+
+        while (!allWaiting())
+        {}
+        notifyPlayers();
+        System.out.println("notif");
+        this.outOfVote = true;
     }
 
     private void night(){

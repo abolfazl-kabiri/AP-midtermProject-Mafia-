@@ -1,3 +1,6 @@
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+
 public class Bulletproof extends Citizen{
 
     @Override
@@ -6,7 +9,9 @@ public class Bulletproof extends Citizen{
     }
 
     @Override
-    public void action() {
+    public String action(ObjectOutputStream out, ObjectInputStream in, Server server) {
+        String response = "";
 
+        return response;
     }
 }

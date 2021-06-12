@@ -1,11 +1,17 @@
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+
 public class DrLector extends Mafia{
     @Override
     public String toString() {
-        return "DrLector";
+        return "DrLecter";
     }
 
     @Override
-    public void action() {
+    public String  action(ObjectOutputStream out, ObjectInputStream in, Server server) {
 
+        String response = "";
+
+        return response;
     }
 }

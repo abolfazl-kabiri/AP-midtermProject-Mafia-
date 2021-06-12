@@ -1,3 +1,6 @@
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+
 public class SimpleMafia extends Mafia{
 
     @Override
@@ -6,7 +9,10 @@ public class SimpleMafia extends Mafia{
     }
 
     @Override
-    public void action() {
+    public String action(ObjectOutputStream out, ObjectInputStream in, Server server) {
 
+        String response = "";
+
+        return response;
     }
 }
