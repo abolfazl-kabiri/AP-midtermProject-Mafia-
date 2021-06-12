@@ -5,6 +5,7 @@ import java.util.Scanner;
 
 public class Player {
 
+    private Socket socket;
     private ObjectOutputStream out;
     private ObjectInputStream in;
     private int port;
@@ -25,7 +26,7 @@ public class Player {
 
     public void start() {
         try {
-            Socket socket = new Socket("127.0.0.1",port);
+            socket = new Socket("127.0.0.1",port);
             System.out.println("connected to server");
 
             out = new ObjectOutputStream(socket.getOutputStream());
@@ -86,8 +87,19 @@ public class Player {
         while (message == null){
             try {
                 message = (Message) in.readObject();
-            } catch (IOException | ClassNotFoundException e){
+            } catch (ClassNotFoundException e){
                 e.printStackTrace();
+            } catch (EOFException e){
+                System.out.println("connection lost");
+                try {
+                    socket.close();
+                    System.exit(0);
+                } catch (IOException ioException) {
+                    ioException.printStackTrace();
+                }
+                break;
+            } catch (IOException io){
+                io.printStackTrace();
             }
         }
         return message;

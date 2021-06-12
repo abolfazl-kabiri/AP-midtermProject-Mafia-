@@ -49,8 +49,13 @@ public class PlayerHandler extends Thread{
 
         vote();
 
+        waitPlayer();
 
 
+    }
+
+    public Socket getSocket() {
+        return socket;
     }
 
     private Message getMessage(){
@@ -221,10 +226,7 @@ public class PlayerHandler extends Thread{
         }catch (InterruptedException inter){
             inter.printStackTrace();
         }
-        System.out.println("woke up");
         //after this result of voting should be sent to players
-
-
 
         msg = server.gatherVotes();
         sendMessage(msg);
@@ -232,7 +234,6 @@ public class PlayerHandler extends Thread{
         // here i need a new wait
 
         waitPlayer();
-        System.out.println("notified");
 
         msg = server.getVictim();
         sendMessage(msg +  " is the victim");
@@ -244,6 +245,11 @@ public class PlayerHandler extends Thread{
            msg = playerRole.action(out,in,server);
            server.mayorResponse(msg);
            waitPlayer();
+        }
+        try {
+            Thread.sleep(2500);
+        } catch (InterruptedException interruptedException) {
+            interruptedException.printStackTrace();
         }
 
     }
@@ -289,6 +295,10 @@ public class PlayerHandler extends Thread{
 
     public boolean playerIsAlive(){
         return isAlive;
+    }
+
+    public void setAlive(boolean alive) {
+        isAlive = alive;
     }
 
     public boolean isReady() {

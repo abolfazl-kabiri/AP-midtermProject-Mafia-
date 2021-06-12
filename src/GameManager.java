@@ -43,11 +43,11 @@ public class GameManager extends Thread {
 
         votes();
 
-        night();
+       // night();
     }
 
 
-    boolean outOfVote = false;
+    private boolean outOfVote = false;
     private void votes(){
 
         outOfVote = false;
@@ -71,7 +71,6 @@ public class GameManager extends Thread {
 
         while (!(allWaiting() && outOfVote))
         {}
-        System.out.println("all waiting");
 
         server.findVictim();
         sleepGame(2000);
@@ -89,21 +88,27 @@ public class GameManager extends Thread {
         while (!allWaiting())
         {}
         notifyPlayers();
-        System.out.println("notif");
         this.outOfVote = true;
     }
 
-    private void night(){
-        while (!allWaiting()){}
+    boolean canStartNight = false;
+    public void night(){
+        System.out.println("wants to join");
+        while (!canStartNight){}
+        System.out.println("in night");
     }
 
-    private void notifyPlayers(){
+    public void notifyPlayers(){
         for (PlayerHandler player : players)
         {
             synchronized (player){
                 player.notify();
             }
         }
+    }
+
+    public void removePlayer(PlayerHandler player){
+        players.remove(player);
     }
 
     private boolean allWaiting(){

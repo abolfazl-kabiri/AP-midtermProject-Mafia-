@@ -12,12 +12,15 @@ public class Server {
     private ArrayList<String> playerNames;
     private int port;
     private HashMap<String,String> votes;
+    private ArrayList<PlayerHandler> removedPlayers;
+    private GameManager gameManager;
 
     public Server() {
         playerHandlers = new Vector<>();
         playerNames = new ArrayList<>();
         port = 2022;
         votes = new HashMap<>();
+        removedPlayers = new ArrayList<>();
     }
 
     Scanner scanner = new Scanner(System.in);
@@ -39,7 +42,7 @@ public class Server {
         }
 
 
-        GameManager gameManager = new GameManager(playerHandlers,numberOfPlayers, this);
+        gameManager = new GameManager(playerHandlers,numberOfPlayers, this);
         gameManager.start();
     }
 
@@ -202,20 +205,41 @@ public class Server {
     public PlayerHandler findHandler(String name){
         PlayerHandler playerHandler = null;
         for (PlayerHandler player : playerHandlers){
-            if(player.getPlayerName().equals(name))
+            if(player.getPlayerName().equals(name)){
                 playerHandler = player;
-            break;
+                break;
+            }
         }
         return playerHandler;
     }
 
     public void removePlayer(PlayerHandler player){
-        System.out.println("removed");
+        try {
+
+            player.setAlive(false);
+            player.getSocket().close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        gameManager.removePlayer(player);
+        playerHandlers.remove(player);
+        playerNames.remove(player.getPlayerName());
+        removedPlayers.add(player);
+
+        System.out.println(victim + " removed");
+        gameManager.notifyPlayers();
+        for(PlayerHandler playerHandler : playerHandlers){
+            playerHandler.sendMessage(victim + " removed");
+        }
+        gameManager.canStartNight = true;
+        System.out.println("set");
+        gameManager.night();
     }
 
     public void mayorResponse(String response){
         if(response.equals("yes")){
             PlayerHandler player = findHandler(victim);
+
             removePlayer(player);
         }else{
             System.out.println("voting canceled");
