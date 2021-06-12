@@ -67,6 +67,9 @@ public class Player {
                 System.out.println(msg);
 //                if(msg.equalsIgnoreCase("chat time over"))
 //                    sendMessage(" ");
+                if(msg.startsWith("you are out")){
+                    writer.interrupt();
+                }
             }
         }
     }
@@ -74,7 +77,7 @@ public class Player {
     class Writer extends Thread{
         @Override
         public void run() {
-            while (true){
+            while (!(writer.isInterrupted())){
                 msg = scanner.nextLine();
                 msg = name + ": " + msg;
                 sendMessage(msg);
@@ -97,7 +100,6 @@ public class Player {
                 } catch (IOException ioException) {
                     ioException.printStackTrace();
                 }
-                break;
             } catch (IOException io){
                 io.printStackTrace();
             }

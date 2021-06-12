@@ -247,11 +247,26 @@ public class PlayerHandler extends Thread{
            waitPlayer();
         }
         try {
-            Thread.sleep(2500);
+            Thread.sleep(4500);
         } catch (InterruptedException interruptedException) {
             interruptedException.printStackTrace();
         }
 
+    }
+
+    public String talkToVictim(){
+        String response = "";
+        sendMessage("do you want to watch the rest?[yes/no]");
+        message = getMessage();
+        response = message.getText();
+        String[] responseTokens = response.split(" ",2);
+
+        if(responseTokens[1] != null)
+            response = responseTokens[1];
+        else
+            response = "no";
+
+        return response;
     }
 
     public void waitPlayer(){

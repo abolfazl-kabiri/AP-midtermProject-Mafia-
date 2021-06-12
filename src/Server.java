@@ -163,7 +163,7 @@ public class Server {
 
     //in this method
     //we create a hashMap with player names keys
-    //and the values are number of repeatation of each key
+    //and the values are number of repetition of each key
     private String victim = "";
     public void findVictim(){
         int maximumRepeat = 0;
@@ -196,6 +196,7 @@ public class Server {
         }
 
         votes.clear();
+        victims.clear();
     }
 
     public String getVictim() {
@@ -232,18 +233,48 @@ public class Server {
             playerHandler.sendMessage(victim + " removed");
         }
         gameManager.canStartNight = true;
-        System.out.println("set");
         gameManager.night();
     }
 
     public void mayorResponse(String response){
         if(response.equals("yes")){
             PlayerHandler player = findHandler(victim);
+            notifySinglePlayer(player);
+            response = player.talkToVictim();
+            if(response.equals("yes")){
+                player.sendMessage("you are out but you can watch game");
+                player.setAlive(false);
+                removedPlayers.add(player);
 
-            removePlayer(player);
+
+                System.out.println(victim + " removed");
+                gameManager.notifyPlayers();
+                for (PlayerHandler playerHandler : playerHandlers){
+                    if(playerHandler.playerIsAlive())
+                        playerHandler.sendMessage(victim + " removed");
+                }
+                gameManager.canStartNight = true;
+                gameManager.night();
+            }
+            else
+                removePlayer(player);
+
         }else{
-            System.out.println("voting canceled");
+            System.out.println("voting canceled by mayor");
+            gameManager.notifyPlayers();
+            for(PlayerHandler playerHandler : playerHandlers)
+                playerHandler.sendMessage("voting canceled by mayor");
+            victim = "";
+            gameManager.canStartNight = true;
+            gameManager.night();
         }
+    }
+
+    private void notifySinglePlayer(PlayerHandler player){
+        synchronized (player){
+            player.notify();
+        }
+
     }
 
     public static void main(String[] args) {

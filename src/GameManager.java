@@ -115,7 +115,9 @@ public class GameManager extends Thread {
         boolean waiting = true;
         for(PlayerHandler player : players){
             synchronized (player){
-                if(player.getState() != State.WAITING){
+                if(!player.playerIsAlive())
+                    continue;
+                else if(player.getState() != State.WAITING){
                     waiting = false;
                     break;
                 }
@@ -185,6 +187,7 @@ public class GameManager extends Thread {
     private void setPlayersRoles(){
         for(int i=0; i<numberOfPlayers; i++){
             players.get(i).setPlayerRole(roles.get(i));
+            System.out.println(players.get(i).getPlayerName() + " --> " + roles.get(i));
         }
         notifyPlayers();
     }
