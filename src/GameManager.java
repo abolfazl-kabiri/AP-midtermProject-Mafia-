@@ -10,6 +10,7 @@ public class GameManager extends Thread {
    private ArrayList<Role> roles;
    private Server server;
    private PlayerHandler mafiaTarget;
+   private PlayerHandler healedMafia;
 
 
     public GameManager(Vector<PlayerHandler> players, int numberOfPlayers, Server server) {
@@ -69,17 +70,28 @@ public class GameManager extends Thread {
 
         sleepGame(10000);
         if(server.checkAlive("Godfather")){
-            String target = server.findByRole("Godfather").mafiaTarget();
+            String target = server.findByRole("Godfather").acionCall();
             System.out.println("godfather choice: " + target);
             this.mafiaTarget = server.findHandler(target);
             sleepGame(5000);
-        } else{
+        } else {
             server.findVictim();
             String target = server.getVictim();
             this.mafiaTarget = server.findHandler(target);
             sleepGame(5000);
         }
         System.out.println(mafiaTarget.getPlayerName());
+
+        if(server.checkAlive("DrLecter")){
+            String healed = server.findByRole("DrLecter").acionCall();
+            System.out.println("lecter choice: " + healed);
+            this.healedMafia = server.findHandler(healed);
+            sleepGame(5000);
+        } else {
+            System.out.println("lecter has been killed");
+            this.healedMafia = null;
+        }
+
     }
 
     public void notifyPlayers(){

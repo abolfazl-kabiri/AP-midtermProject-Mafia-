@@ -120,6 +120,15 @@ public class Server {
         return citizenList;
     }
 
+    public String getMafiaList(){
+        String mafiaList = "";
+        for (PlayerHandler player : playerHandlers){
+            if(player.playerIsAlive() && player.getPlayerRole() instanceof Mafia)
+                mafiaList += player.getPlayerName() + "\n";
+        }
+        return mafiaList;
+    }
+
     public boolean acceptableVote(String target, String playerName){
 
         if(target.equals(playerName))

@@ -312,11 +312,9 @@ public class PlayerHandler extends Thread{
         return target;
     }
 
-    public String mafiaTarget(){
+    public String acionCall(){
         return playerRole.action(out,in,server);
     }
-
-
 
     public void sendMessage(String msg) {
         try {
