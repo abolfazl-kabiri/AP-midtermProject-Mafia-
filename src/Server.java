@@ -211,7 +211,6 @@ public class Server {
         return playerHandler;
     }
 
-    ////////////////////////////////////////////////////////////////////////////
     public void removePlayer(PlayerHandler player){
         try {
             player.setAlive(false);
@@ -280,14 +279,10 @@ public class Server {
         return alive;
     }
 
-    public void wakeMafias(){
+    public void mafiaConsult(){
         for(PlayerHandler player : playerHandlers){
-            if(player.playerIsAlive() && player.getPlayerRole() instanceof Mafia){
-                notifySinglePlayer(player);
-                if(!(player.getPlayerRole() instanceof Godfather)){
-                    storeVotes(player.getPlayerName(), player.mafiaConsult());
-                }
-                player.waitPlayer();
+            if((!(player.getPlayerRole() instanceof Godfather)) && (player.getPlayerRole() instanceof Mafia)){
+                storeVotes(player.getPlayerName(), player.mafiaConsult());
             }
         }
     }
@@ -296,17 +291,6 @@ public class Server {
         PlayerHandler playerHandler = null;
         for(PlayerHandler player : playerHandlers){
             if(player.getPlayerRole().toString().equals(role) && player.playerIsAlive()){
-                playerHandler = player;
-                break;
-            }
-        }
-        return playerHandler;
-    }
-
-    public PlayerHandler findByName(String name){
-        PlayerHandler playerHandler = null;
-        for(PlayerHandler player : playerHandlers) {
-            if (player.getPlayerName().equals(name) && player.playerIsAlive()) {
                 playerHandler = player;
                 break;
             }

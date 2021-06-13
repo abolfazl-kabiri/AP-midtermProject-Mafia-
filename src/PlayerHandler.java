@@ -291,8 +291,15 @@ public class PlayerHandler extends Thread{
     }
 
     public void night(){
+        try {
+            Thread.sleep(2000);
+        } catch (InterruptedException interruptedException) {
+            interruptedException.printStackTrace();
+        }
+
         sendMessage("It is night");
         waitPlayer();
+
         try {
             Thread.sleep(2000);
         } catch (InterruptedException interruptedException) {

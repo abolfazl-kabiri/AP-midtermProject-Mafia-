@@ -9,6 +9,7 @@ public class GameManager extends Thread {
    private int numberOfCitizens;
    private ArrayList<Role> roles;
    private Server server;
+   private PlayerHandler mafiaTarget;
 
 
     public GameManager(Vector<PlayerHandler> players, int numberOfPlayers, Server server) {
@@ -56,7 +57,7 @@ public class GameManager extends Thread {
         {}
 
         notifyPlayers();
-        sleepGame(2000);
+        sleepGame(10000);
         mafiaTime();
 
 
@@ -64,15 +65,21 @@ public class GameManager extends Thread {
     }
 
     private void mafiaTime(){
-        server.wakeMafias();
+        server.mafiaConsult();
 
-        while (!allWaiting())
-        {}
-
+        sleepGame(10000);
         if(server.checkAlive("Godfather")){
             String target = server.findByRole("Godfather").mafiaTarget();
-            server.removePlayer(server.findByName(target));
+            System.out.println("godfather choice: " + target);
+            this.mafiaTarget = server.findHandler(target);
+            sleepGame(5000);
+        } else{
+            server.findVictim();
+            String target = server.getVictim();
+            this.mafiaTarget = server.findHandler(target);
+            sleepGame(5000);
         }
+        System.out.println(mafiaTarget.getPlayerName());
     }
 
     public void notifyPlayers(){
