@@ -35,61 +35,44 @@ public class GameManager extends Thread {
 
         sleepGame(5000);
 
+        //here at first the hashMap of votes should be cleared
         votes();
 
-       // night();
+        night();
+
+
     }
 
 
-    private boolean outOfVote = false;
-    private void votes(){
-
-        outOfVote = false;
-
-
-        while (!allWaiting()) { }
-
-        notifyPlayers();
-
-        Timer timer = new Timer();
-
-        TimerTask timerTask = new TimerTask() {
-
-            @Override
-            public void run() {
-                endVote();
-            }
-        };
-        timer.schedule(timerTask,30 * 1000);
-
-
-        while (!(allWaiting() && outOfVote))
-        {}
-
-        server.findVictim();
-        sleepGame(2000);
-        notifyPlayers();
-    }
-
-    private void endVote(){
-        System.out.println("vote time finished");
-        for (PlayerHandler player : players){
-            player.voteTime = false;
-            player.sendMessage("vote time is over");
-
-        }
-
-        while (!allWaiting())
-        {}
-        notifyPlayers();
-        this.outOfVote = true;
-    }
 
     boolean canStartNight = false;
     public void night(){
-        System.out.println("wants to join");
-        while (!canStartNight){}
-        System.out.println("in night");
+        while (!outOfVote)
+        {}
+        System.out.println("It is night");
+        server.notifySinglePlayer(server.findByRole("Mayor"));
+        sleepGame(3000);
+        while (!allWaiting())
+        {}
+
+        notifyPlayers();
+        sleepGame(2000);
+        mafiaTime();
+
+
+
+    }
+
+    private void mafiaTime(){
+        server.wakeMafias();
+
+        while (!allWaiting())
+        {}
+
+        if(server.checkAlive("Godfather")){
+            String target = server.findByRole("Godfather").mafiaTarget();
+            server.removePlayer(server.findByName(target));
+        }
     }
 
     public void notifyPlayers(){
@@ -105,7 +88,7 @@ public class GameManager extends Thread {
         players.remove(player);
     }
 
-    private boolean allWaiting(){
+    public boolean allWaiting(){
         boolean waiting = true;
         for(PlayerHandler player : players){
             synchronized (player){
@@ -244,6 +227,52 @@ public class GameManager extends Thread {
         }
         this.exitChat = true;
     }
+
+
+    private boolean outOfVote = false;
+    private void votes(){
+
+        outOfVote = false;
+
+
+        while (!allWaiting()) { }
+
+        notifyPlayers();
+
+        Timer timer = new Timer();
+
+        TimerTask timerTask = new TimerTask() {
+
+            @Override
+            public void run() {
+                endVote();
+            }
+        };
+        timer.schedule(timerTask,30 * 1000);
+
+
+        while (!(allWaiting() && outOfVote))
+        {}
+
+        server.findVictim();
+        sleepGame(2000);
+        notifyPlayers();
+    }
+
+    private void endVote(){
+        System.out.println("vote time finished");
+        for (PlayerHandler player : players){
+            player.voteTime = false;
+            player.sendMessage("vote time is over");
+
+        }
+
+        while (!allWaiting())
+        {}
+        notifyPlayers();
+        this.outOfVote = true;
+    }
+
 
     private void sleepGame( int millis){
         try {

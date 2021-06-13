@@ -12,7 +12,7 @@ public class Server {
     private ArrayList<String> playerNames;
     private int port;
     private HashMap<String,String> votes;
-    private ArrayList<PlayerHandler> removedPlayers;
+    private ArrayList<Role> removedRoles;
     private GameManager gameManager;
 
     public Server() {
@@ -20,7 +20,7 @@ public class Server {
         playerNames = new ArrayList<>();
         port = 2022;
         votes = new HashMap<>();
-        removedPlayers = new ArrayList<>();
+        removedRoles = new ArrayList<>();
     }
 
     Scanner scanner = new Scanner(System.in);
@@ -111,6 +111,15 @@ public class Server {
         return playerList;
     }
 
+    public String getCitizenList(){
+        String citizenList = "";
+        for (PlayerHandler player : playerHandlers){
+            if(player.playerIsAlive() && player.getPlayerRole() instanceof Citizen)
+                citizenList += player.getPlayerName() + "\n";
+        }
+        return citizenList;
+    }
+
     public boolean acceptableVote(String target, String playerName){
 
         if(target.equals(playerName))
@@ -142,15 +151,6 @@ public class Server {
             votes.put(playerName,target);
     }
 
-    private int numberOfAlivePlayers(){
-        int number = 0;
-        for(PlayerHandler player : playerHandlers){
-            if(player.playerIsAlive())
-                number++;
-        }
-        return number;
-    }
-
     public String gatherVotes(){
         String voteResult = "";
         Iterator<Map.Entry<String, String>> iterator = votes.entrySet().iterator();
@@ -161,9 +161,6 @@ public class Server {
         return voteResult;
     }
 
-    //in this method
-    //we create a hashMap with player names keys
-    //and the values are number of repetition of each key
     private String victim = "";
     public void findVictim(){
         int maximumRepeat = 0;
@@ -214,67 +211,107 @@ public class Server {
         return playerHandler;
     }
 
+    ////////////////////////////////////////////////////////////////////////////
     public void removePlayer(PlayerHandler player){
         try {
-
             player.setAlive(false);
+            gameManager.removePlayer(player);
+            playerHandlers.remove(player);
+            playerNames.remove(player.getPlayerName());
+            removedRoles.add(player.getPlayerRole());
             player.getSocket().close();
         } catch (IOException e) {
             e.printStackTrace();
         }
-        gameManager.removePlayer(player);
-        playerHandlers.remove(player);
-        playerNames.remove(player.getPlayerName());
-        removedPlayers.add(player);
+
+        player = null;
 
         System.out.println(victim + " removed");
-        gameManager.notifyPlayers();
         for(PlayerHandler playerHandler : playerHandlers){
             playerHandler.sendMessage(victim + " removed");
         }
-        gameManager.canStartNight = true;
-        gameManager.night();
     }
 
     public void mayorResponse(String response){
         if(response.equals("yes")){
             PlayerHandler player = findHandler(victim);
-            notifySinglePlayer(player);
             response = player.talkToVictim();
             if(response.equals("yes")){
                 player.sendMessage("you are out but you can watch game");
                 player.setAlive(false);
-                removedPlayers.add(player);
+                removedRoles.add(player.getPlayerRole());
 
 
                 System.out.println(victim + " removed");
-                gameManager.notifyPlayers();
                 for (PlayerHandler playerHandler : playerHandlers){
                     if(playerHandler.playerIsAlive())
                         playerHandler.sendMessage(victim + " removed");
                 }
-                gameManager.canStartNight = true;
-                gameManager.night();
             }
             else
                 removePlayer(player);
 
         }else{
             System.out.println("voting canceled by mayor");
-            gameManager.notifyPlayers();
+            //gameManager.notifyPlayers();
             for(PlayerHandler playerHandler : playerHandlers)
                 playerHandler.sendMessage("voting canceled by mayor");
             victim = "";
-            gameManager.canStartNight = true;
-            gameManager.night();
+
         }
+        gameManager.canStartNight = true;
     }
 
-    private void notifySinglePlayer(PlayerHandler player){
+    public void notifySinglePlayer(PlayerHandler player){
         synchronized (player){
             player.notify();
         }
 
+    }
+
+    public boolean checkAlive(String role){
+        boolean alive = false;
+        for(PlayerHandler player : playerHandlers){
+            if(player.getPlayerRole().toString().equals(role)){
+                alive = player.playerIsAlive();
+                break;
+            }
+        }
+        return alive;
+    }
+
+    public void wakeMafias(){
+        for(PlayerHandler player : playerHandlers){
+            if(player.playerIsAlive() && player.getPlayerRole() instanceof Mafia){
+                notifySinglePlayer(player);
+                if(!(player.getPlayerRole() instanceof Godfather)){
+                    storeVotes(player.getPlayerName(), player.mafiaConsult());
+                }
+                player.waitPlayer();
+            }
+        }
+    }
+
+    public PlayerHandler findByRole(String role){
+        PlayerHandler playerHandler = null;
+        for(PlayerHandler player : playerHandlers){
+            if(player.getPlayerRole().toString().equals(role) && player.playerIsAlive()){
+                playerHandler = player;
+                break;
+            }
+        }
+        return playerHandler;
+    }
+
+    public PlayerHandler findByName(String name){
+        PlayerHandler playerHandler = null;
+        for(PlayerHandler player : playerHandlers) {
+            if (player.getPlayerName().equals(name) && player.playerIsAlive()) {
+                playerHandler = player;
+                break;
+            }
+        }
+        return playerHandler;
     }
 
     public static void main(String[] args) {

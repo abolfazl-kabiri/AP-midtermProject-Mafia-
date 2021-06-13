@@ -51,6 +51,16 @@ public class PlayerHandler extends Thread{
 
         waitPlayer();
 
+        night();
+
+
+    }
+
+    private void setup(){
+
+        handleName();
+
+        handleReady();
 
     }
 
@@ -226,7 +236,7 @@ public class PlayerHandler extends Thread{
 
         waitPlayer();
         try {
-            Thread.sleep(8000);
+            Thread.sleep(2500);
         }catch (InterruptedException inter){
             inter.printStackTrace();
         }
@@ -244,19 +254,13 @@ public class PlayerHandler extends Thread{
 
         if(!(playerRole instanceof Mayor)){
             sendMessage("wait for mayor");
-            waitPlayer();
+        //    waitPlayer();
         } else if(playerIsAlive()){
            msg = playerRole.action(out,in,server);
            server.mayorResponse(msg);
-           waitPlayer();
+         //  waitPlayer();
         } else{
             server.mayorResponse("yes");
-            waitPlayer();
-        }
-        try {
-            Thread.sleep(4500);
-        } catch (InterruptedException interruptedException) {
-            interruptedException.printStackTrace();
         }
 
     }
@@ -286,13 +290,26 @@ public class PlayerHandler extends Thread{
         }
     }
 
-    private void setup(){
-
-        handleName();
-
-        handleReady();
-
+    public void night(){
+        sendMessage("It is night");
+        waitPlayer();
+        try {
+            Thread.sleep(2000);
+        } catch (InterruptedException interruptedException) {
+            interruptedException.printStackTrace();
+        }
     }
+
+    public String mafiaConsult(){
+        String target = ((Mafia)playerRole).mafiaChat(out,in,server);
+        return target;
+    }
+
+    public String mafiaTarget(){
+        return playerRole.action(out,in,server);
+    }
+
+
 
     public void sendMessage(String msg) {
         try {
