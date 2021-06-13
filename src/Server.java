@@ -142,6 +142,30 @@ public class Server {
         return false;
     }
 
+    public boolean acceptableMafiaConsult(String name){
+        boolean accepted = false;
+        if(getCitizenList().contains(name))
+            accepted = true;
+        return accepted;
+    }
+
+    public boolean acceptableMafiaHeal(String name){
+        boolean accepted = false;
+        if(getMafiaList().contains(name)){
+            PlayerHandler player = findHandler(name);
+            if(player.getPlayerRole() instanceof DrLector && player.isHealed())
+                accepted = false;
+            else{
+                accepted = true;
+                player.setHealed(true);
+            }
+
+        }
+        else
+            accepted = false;
+        return accepted;
+    }
+
     public void storeVotes(String playerName, String target){
         boolean votedBefore = false;
 

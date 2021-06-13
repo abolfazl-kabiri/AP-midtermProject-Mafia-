@@ -10,10 +10,10 @@ public class PlayerHandler extends Thread{
     private boolean isReady;
     private ObjectInputStream in;
     private ObjectOutputStream out;
-    private boolean isAwake;
     private boolean isAlive;
     private Thread chat;
     private Thread vote;
+    private boolean healed;
 
 
     public PlayerHandler( Server server,Socket socket) {
@@ -27,6 +27,7 @@ public class PlayerHandler extends Thread{
         }
         isReady = false;
         isAlive = true;
+        healed = false;
     }
 
     String msg = "";
@@ -183,7 +184,6 @@ public class PlayerHandler extends Thread{
         chat.start();
     }
 
-
     boolean voteTime;
     private void vote(){
         voteTime = true;
@@ -312,7 +312,7 @@ public class PlayerHandler extends Thread{
         return target;
     }
 
-    public String acionCall(){
+    public String actionCall(){
         return playerRole.action(out,in,server);
     }
 
@@ -363,5 +363,13 @@ public class PlayerHandler extends Thread{
 
     public Role getPlayerRole() {
         return playerRole;
+    }
+
+    public boolean isHealed() {
+        return healed;
+    }
+
+    public void setHealed(boolean healed) {
+        this.healed = healed;
     }
 }

@@ -11,17 +11,27 @@ public abstract class Mafia extends Role{
     public abstract String action(ObjectOutputStream out, ObjectInputStream in, Server server);
 
     public String mafiaChat(ObjectOutputStream out, ObjectInputStream in, Server server){
-        String target = null;
+        boolean accepted = false;
+        String target = "";
         try {
 
             out.writeObject(new Message("\nchoose one citizen to help godfather"));
             out.writeObject(new Message(server.getCitizenList()));
 
-            Message message = (Message)in.readObject();
-            target = message.getText();
-            String[] targetTokens = target.split(" ",2);
-            if(targetTokens.length > 1)
-                target = targetTokens[1].trim();
+            while (!accepted){
+                Message message = (Message)in.readObject();
+                target = message.getText();
+                String[] targetTokens = target.split(" ",2);
+                if(targetTokens.length > 1)
+                    target = targetTokens[1].trim();
+
+                if(server.acceptableMafiaConsult(target)){
+                    out.writeObject(new Message("accepted"));
+                    accepted = true;
+                }
+                else
+                    out.writeObject(new Message("unacceptable try again"));
+            }
             System.out.println("target received " + target);
 
         } catch (IOException e) {

@@ -10,6 +10,7 @@ public class DrLector extends Mafia{
 
     @Override
     public String  action(ObjectOutputStream out, ObjectInputStream in, Server server) {
+        boolean accepted = false;
         String response = "";
 
         try {
@@ -18,12 +19,21 @@ public class DrLector extends Mafia{
             out.writeObject(new Message("following mafias are alive"));
             out.writeObject(new Message(server.getMafiaList()));
 
-            Message message = (Message) in.readObject();
-            response = message.getText();
+            while (!accepted){
+                Message message = (Message) in.readObject();
+                response = message.getText();
 
-            String[] responseTokens = response.split(" ",2);
-            if(responseTokens.length > 1)
-                response = responseTokens[1].trim();
+                String[] responseTokens = response.split(" ",2);
+                if(responseTokens.length > 1)
+                    response = responseTokens[1].trim();
+                if(server.acceptableMafiaHeal(response)){
+                    out.writeObject(new Message("accepted"));
+                    accepted = true;
+                }
+                else
+                    out.writeObject(new Message("unacceptable try again"));
+            }
+
         } catch (IOException e) {
             e.printStackTrace();
         } catch (ClassNotFoundException e) {

@@ -53,7 +53,7 @@ public class GameManager extends Thread {
         {}
         System.out.println("It is night");
         server.notifySinglePlayer(server.findByRole("Mayor"));
-        sleepGame(3000);
+        sleepGame(10000);
         while (!allWaiting())
         {}
 
@@ -70,7 +70,7 @@ public class GameManager extends Thread {
 
         sleepGame(10000);
         if(server.checkAlive("Godfather")){
-            String target = server.findByRole("Godfather").acionCall();
+            String target = server.findByRole("Godfather").actionCall();
             System.out.println("godfather choice: " + target);
             this.mafiaTarget = server.findHandler(target);
             sleepGame(5000);
@@ -83,7 +83,7 @@ public class GameManager extends Thread {
         System.out.println(mafiaTarget.getPlayerName());
 
         if(server.checkAlive("DrLecter")){
-            String healed = server.findByRole("DrLecter").acionCall();
+            String healed = server.findByRole("DrLecter").actionCall();
             System.out.println("lecter choice: " + healed);
             this.healedMafia = server.findHandler(healed);
             sleepGame(5000);
@@ -217,6 +217,7 @@ public class GameManager extends Thread {
 
         while (!(allWaiting())){ }
         notifyPlayers();
+        System.out.println("It is day\n");
 
         Timer timer = new Timer();
         TimerTask timerTask = new TimerTask() {
@@ -225,7 +226,7 @@ public class GameManager extends Thread {
                 endChat();
             }
         };
-        timer.schedule(timerTask,60*1000);
+        timer.schedule(timerTask,10*1000);
 
         while (!server.allReady()) {}
 
