@@ -11,6 +11,7 @@ public class GameManager extends Thread {
    private Server server;
    private PlayerHandler mafiaTarget;
    private PlayerHandler healedMafia;
+   private PlayerHandler healedByDoctor;
 
 
     public GameManager(Vector<PlayerHandler> players, int numberOfPlayers, Server server) {
@@ -60,6 +61,8 @@ public class GameManager extends Thread {
         notifyPlayers();
         sleepGame(10000);
         mafiaTime();
+        citizenTime();
+
 
 
 
@@ -80,7 +83,6 @@ public class GameManager extends Thread {
             this.mafiaTarget = server.findHandler(target);
             sleepGame(5000);
         }
-        System.out.println(mafiaTarget.getPlayerName());
 
         if(server.checkAlive("DrLecter")){
             String healed = server.findByRole("DrLecter").actionCall();
@@ -90,6 +92,38 @@ public class GameManager extends Thread {
         } else {
             System.out.println("lecter has been killed");
             this.healedMafia = null;
+            sleepGame(5000);
+        }
+
+    }
+
+    private void citizenTime(){
+
+        doctorTime();
+
+        detectiveTime();
+    }
+
+    private void doctorTime(){
+        if(server.checkAlive("Doctor")){
+            String doctorHealed = server.findByRole("Doctor").actionCall();
+            System.out.println("doctor healed : " + doctorHealed);
+            this.healedByDoctor = server.findHandler(doctorHealed);
+            sleepGame(5000);
+        } else {
+            System.out.println("doctor has been killed");
+            this.healedByDoctor = null;
+            sleepGame(5000);
+        }
+    }
+
+    private void detectiveTime(){
+        if(server.checkAlive("Detective")){
+            String checkedRole = server.findByRole("Detective").actionCall();
+            System.out.println("detective checked " + checkedRole);
+            sleepGame(5000);
+        } else {
+            sleepGame(5000);
         }
 
     }
@@ -226,7 +260,7 @@ public class GameManager extends Thread {
                 endChat();
             }
         };
-        timer.schedule(timerTask,10*1000);
+        timer.schedule(timerTask,2*60*1000);
 
         while (!server.allReady()) {}
 

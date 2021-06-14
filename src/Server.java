@@ -166,6 +166,35 @@ public class Server {
         return accepted;
     }
 
+    public boolean acceptableDoctorHeal(String name){
+        boolean accepted = false;
+        if(getList().contains(name)){
+            PlayerHandler player = findHandler(name);
+            if(player.getPlayerRole() instanceof Doctor && player.isHealed())
+                accepted = false;
+            else{
+                accepted = true;
+                player.setHealed(true);
+            }
+        }
+        else
+            accepted = false;
+        return accepted;
+    }
+
+    public boolean acceptableCheckRole(String name){
+        boolean accept = false;
+        String detectiveName = findByRole("Detective").getPlayerName();
+        if(getList().contains(name) && (!name.equals(detectiveName)))
+            accept = true;
+        return accept;
+    }
+
+    public Role checkRole(String name){
+        Role role = findHandler(name).getPlayerRole();
+        return role;
+    }
+
     public void storeVotes(String playerName, String target){
         boolean votedBefore = false;
 
