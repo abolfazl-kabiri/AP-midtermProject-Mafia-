@@ -47,8 +47,10 @@ public class Server {
     }
 
     private void acceptPlayers(){
-        System.out.print("enter number of players: ");
+        System.out.print("enter number of players (at least 8 players): ");
         numberOfPlayers = scanner.nextInt();
+        while (numberOfPlayers < 8)
+            numberOfPlayers = scanner.nextInt();
         try
         {
             ServerSocket serverSocket = new ServerSocket(port);
@@ -74,15 +76,12 @@ public class Server {
     }
 
     public boolean allReady(){
-        int counter = 0;
-        boolean start = true;
-        for(int i = 0; i< playerHandlers.size(); i++){
-            if((playerHandlers.get(i).isReady()))
-                counter++;
-        }
-        if(counter < numberOfPlayers)
-            start = false;
-        return start;
+
+       for(PlayerHandler player : playerHandlers){
+           if(player.playerIsAlive() && !(player.isReady()))
+               return false;
+       }
+       return true;
     }
 
     public boolean checkName(String name){
@@ -278,6 +277,7 @@ public class Server {
             this.victim = victims.get(randomKill);
         }
 
+        voteNumber.clear();
         votes.clear();
         victims.clear();
     }
@@ -299,6 +299,7 @@ public class Server {
 
     public void removePlayer(PlayerHandler player){
         try {
+            player.setReady(true);
             player.setAlive(false);
             gameManager.removePlayer(player);
             playerHandlers.remove(player);
@@ -315,25 +316,30 @@ public class Server {
         for(PlayerHandler playerHandler : playerHandlers){
             playerHandler.sendMessage(player.getPlayerName() + " removed");
         }
-        player = null;
     }
 
     public void talkingToVictim(PlayerHandler player){
         String response = player.talkToVictim();
+        try {
+            Thread.sleep(5000);
+        } catch (InterruptedException interruptedException) {
+            interruptedException.printStackTrace();
+        }
         if(response.equals("yes")){
             player.sendMessage("you are out but you can watch game");
             player.setAlive(false);
             removedRoles.add(player.getPlayerRole());
 
 
-            System.out.println(victim + " removed");
+            System.out.println(player.getPlayerName() + " removed");
             for (PlayerHandler playerHandler : playerHandlers){
                 if(playerHandler.playerIsAlive())
-                    playerHandler.sendMessage(victim + " removed");
+                    playerHandler.sendMessage(player.getPlayerName() + " removed");
             }
         }
         else
             removePlayer(player);
+
     }
 
     public void mayorResponse(String response){
@@ -347,6 +353,12 @@ public class Server {
             for(PlayerHandler playerHandler : playerHandlers)
                 playerHandler.sendMessage("voting canceled by mayor");
             victim = "";
+        }
+
+        try {
+            Thread.sleep(1000);
+        } catch (InterruptedException interruptedException) {
+            interruptedException.printStackTrace();
         }
         gameManager.canStartNight = true;
     }
@@ -383,6 +395,14 @@ public class Server {
 
     public ArrayList<Role> getRemovedRoles() {
         return removedRoles;
+    }
+
+    public boolean gameContinues(){
+        return gameManager.continueGame();
+    }
+
+    public HashMap<String, String> getVotes() {
+        return votes;
     }
 
     public static void main(String[] args) {

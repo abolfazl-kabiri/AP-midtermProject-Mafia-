@@ -15,20 +15,30 @@ public class Mayor extends Citizen{
 
     @Override
     public String action(ObjectOutputStream out, ObjectInputStream in, Server server) {
-        Message message = null;
+
+        boolean accepted = false;
         String response = "";
+
         try {
             out.writeObject(new Message("do you accept this? [yes/no]"));
 
-            while (message == null){
-                message = (Message) in.readObject();
+            while (!accepted){
+                Message message = (Message) in.readObject();
                 response = message.getText();
+
+                String[] responseTokens = response.split(" ", 2);
+                if(responseTokens[1] != null)
+                    response = responseTokens[1];
+
+                if(!(response.equalsIgnoreCase("yes") || response.equalsIgnoreCase("no")))
+                    out.writeObject(new Message("unacceptable try again"));
+                else {
+                    out.writeObject(new Message("accepted"));
+                    accepted = true;
+                }
             }
-            String[] responseTokens = response.split(" ", 2);
-            if(responseTokens[1] != null)
-                response = responseTokens[1];
-            else
-                response = "yes";
+
+
         } catch (IOException e) {
             e.printStackTrace();
         } catch (ClassNotFoundException e) {

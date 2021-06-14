@@ -35,21 +35,74 @@ public class GameManager extends Thread {
 
         introductions();
 
-        sleepGame(2000);
+        while (continueGame()){
+            sleepGame(2000);
 
-        chat();
+            chat();
 
-        sleepGame(5000);
+            sleepGame(5000);
 
-        //here at first the hashMap of votes should be cleared
-        votes();
+            votes();
 
-        night();
+            update();
 
+            if(continueGame()){
+                night();
+
+                update();
+            }
+        }
 
     }
 
 
+    public boolean continueGame(){
+        if(numberOfMafias >= numberOfCitizens){
+            System.out.println("mafia is winner");
+            for(PlayerHandler player : players)
+                player.sendMessage("mafia is winner");
+            return false;
+        } else if(numberOfMafias == 0){
+            System.out.println("city is winner");
+            for(PlayerHandler player : players)
+                player.sendMessage("city is winner");
+            return false;
+        } else
+            return true;
+    }
+
+    private void updatePlayers(){
+        int counter = 0;
+        for(PlayerHandler player : players){
+            if(player.playerIsAlive())
+                counter++;
+        }
+        this.numberOfPlayers = counter;
+    }
+
+    private void updateMafias(){
+        int counter = 0;
+        for(PlayerHandler player : players){
+            if(player.getPlayerRole() instanceof Mafia && player.playerIsAlive())
+                counter++;
+        }
+        this.numberOfMafias = counter;
+    }
+
+    private void updateCitizens(){
+        int counter = 0;
+        for(PlayerHandler player : players){
+            if(player.getPlayerRole() instanceof Citizen && player.playerIsAlive())
+                counter++;
+        }
+        this.numberOfCitizens = counter;
+    }
+
+    private void update(){
+        updatePlayers();
+        updateMafias();
+        updateCitizens();
+    }
 
     boolean canStartNight = false;
     public void night(){
@@ -78,7 +131,7 @@ public class GameManager extends Thread {
     private void mafiaTime(){
         server.mafiaConsult();
 
-        sleepGame(10000);
+        sleepGame(6000);
         if(server.checkAlive("Godfather")){
             String target = server.findByRole("Godfather").actionCall();
             System.out.println("godfather choice: " + target);
@@ -172,7 +225,7 @@ public class GameManager extends Thread {
 
             if(!psychoChoice.equalsIgnoreCase("no")){
                 System.out.println("Psychologist choice: "  + psychoChoice);
-                this.psychologistTarget = server.sniperConclusion(psychoChoice);
+                this.psychologistTarget = server.findHandler(psychoChoice);
                 System.out.println("Psychologist victim: " + psychologistTarget.getPlayerName());
                 sleepGame(5000);
             } else {
@@ -212,7 +265,7 @@ public class GameManager extends Thread {
                 server.talkingToVictim(mafiaTarget);
             }
         }
-        if(sniperTarget != null && sniperTarget != healedByDoctor && sniperTarget != healedMafia){
+        if(sniperTarget != null && sniperTarget != healedByDoctor && sniperTarget != healedMafia && sniperTarget.playerIsAlive()){
             sniperTarget.getPlayerRole().decreaseHealth();
             if(sniperTarget.getPlayerRole().getHealth() == 0){
                 server.talkingToVictim(sniperTarget);
@@ -225,12 +278,14 @@ public class GameManager extends Thread {
             String roles = "";
             for (Role role : removedRoles)
                 roles += role + "\n";
+            System.out.println("\nkilled roles\n" + roles);
             for (PlayerHandler player : players)
                 player.sendMessage("\nkilled roles\n" + roles);
             checkRemovedRoles = false;
+
         }
 
-        if(psychologistTarget != null) {
+        if(psychologistTarget != null && psychologistTarget.playerIsAlive()) {
             psychologistTarget.setMuted(true);
             System.out.println(psychologistTarget.getPlayerName() + " is muted for next round");
             // a message should be sent to the player and others
@@ -241,6 +296,7 @@ public class GameManager extends Thread {
                     player.sendMessage(psychologistTarget.getPlayerName() + " is muted for next round");
             }
         }
+        server.getVotes().clear();
     }
 
     public void notifyPlayers(){
@@ -253,21 +309,27 @@ public class GameManager extends Thread {
     }
 
     public void removePlayer(PlayerHandler player){
-        players.remove(player);
+        synchronized (player){
+            players.remove(player);
+        }
+
     }
 
     public boolean allWaiting(){
         boolean waiting = true;
-        for(PlayerHandler player : players){
-            synchronized (player){
-                if(!player.playerIsAlive())
-                    continue;
-                else if(player.getState() != State.WAITING){
-                    waiting = false;
-                    break;
+        synchronized (players){
+            for(PlayerHandler player : players){
+                synchronized (player){
+                    if(!player.playerIsAlive())
+                        continue;
+                    else if(player.getState() != State.WAITING){
+                        waiting = false;
+                        break;
+                    }
                 }
             }
         }
+
         return waiting;
     }
 
@@ -366,6 +428,7 @@ public class GameManager extends Thread {
 
         while (!(allWaiting())){ }
         notifyPlayers();
+        exitChat = false;
         System.out.println("It is day\n");
 
         Timer timer = new Timer();
@@ -375,7 +438,7 @@ public class GameManager extends Thread {
                 endChat();
             }
         };
-        timer.schedule(timerTask,2*60*1000);
+        timer.schedule(timerTask,5*60*1000);
 
         while (!server.allReady()) {}
 
@@ -390,10 +453,14 @@ public class GameManager extends Thread {
         System.out.println("chat is over");
 
         for(PlayerHandler player : players){
-            //kill chat thread of player threads
-            player.sendMessage("chat time over");
             player.chatTime = false;
+            player.sendMessage("chat time over");
+
         }
+
+        while (!allWaiting())
+        {}
+        notifyPlayers();
         this.exitChat = true;
     }
 

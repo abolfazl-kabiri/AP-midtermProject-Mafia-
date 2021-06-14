@@ -1,5 +1,6 @@
 import java.io.*;
 import java.net.Socket;
+import java.net.SocketException;
 
 public class PlayerHandler extends Thread{
 
@@ -44,19 +45,29 @@ public class PlayerHandler extends Thread{
 
         handleIntroduction();
 
-        waitPlayer();
+        while (server.gameContinues()){
 
-        handleChatTime();
+            waitPlayer();
 
-        waitPlayer();
+            handleChatTime();
 
-        vote();
+            waitPlayer();
 
-        waitPlayer();
+            unmute();
 
-        night();
+            vote();
 
+            waitPlayer();
 
+            if(server.gameContinues()){
+                night();
+            }
+        }
+    }
+
+    private void unmute(){
+        if(muted)
+            this.muted = false;
     }
 
     private void setup(){
@@ -97,7 +108,7 @@ public class PlayerHandler extends Thread{
         message = getMessage();
         msg = message.getText();
 
-        if(server.checkName(msg)){
+        if(server.checkName(msg) && msg.length() > 0){
             sendMessage("welcome " + msg);
             this.playerName = msg;
         }
@@ -143,9 +154,16 @@ public class PlayerHandler extends Thread{
     boolean chatTime;
     public void handleChatTime(){
         chatTime = true;
-        sendMessage("It is day\nyou can chat for 5 minutes or you can send \"ready\" to stop sending");
+        if(playerIsAlive()){
+            sendMessage("It is day\nyou can chat for 5 minutes or you can send \"ready\" to stop sending");
+            isReady = false;
+            if(muted)
+                isReady = true;
+        } else {
+            sendMessage("chat time");
+            isReady = true;
+        }
 
-        isReady = false;
 
         class ChatHandler extends Thread{
 
@@ -164,7 +182,7 @@ public class PlayerHandler extends Thread{
 
             @Override
             public void run() {
-                while (chatTime && (!muted)){
+                while (chatTime && (!muted) && playerIsAlive()){
                     message = getMessage();
                     msg = message.getText();
                     System.out.println(msg);
@@ -173,7 +191,8 @@ public class PlayerHandler extends Thread{
                         isReady = true;
                         return;
                     }
-                    server.broadcast(msg);
+                    if(!msg.equals("finish"))
+                        server.broadcast(msg);
                 }
                 setReady(true);
                 return;
@@ -184,15 +203,21 @@ public class PlayerHandler extends Thread{
         chat = new ChatHandler();
 
         chat.start();
+        waitPlayer();
     }
 
     boolean voteTime;
     private void vote(){
         voteTime = true;
-        sendMessage("vote time\nyou have 30 seconds\nfollowing players are alive\nwrite the name to vote");
 
-        String alivePlayers = server.getList();
-        sendMessage(alivePlayers);
+        if(playerIsAlive()){
+            sendMessage("vote time\nyou have 30 seconds\nfollowing players are alive\nwrite the name to vote");
+
+            String alivePlayers = server.getList();
+            sendMessage(alivePlayers);
+        } else {
+            sendMessage("vote time");
+        }
 
 
         class VoteHandler extends Thread{
@@ -202,6 +227,8 @@ public class PlayerHandler extends Thread{
                 while (message == null){
                     try {
                         message = (Message) in.readObject();
+                    }catch (SocketException s){
+                        System.out.println("player disconnected");
                     } catch (IOException | ClassNotFoundException e){
                         e.printStackTrace();
                     }
@@ -212,7 +239,7 @@ public class PlayerHandler extends Thread{
             @Override
             public void run() {
                 String target;
-                while (voteTime){
+                while (voteTime && playerIsAlive()){
                     message = getMessage();
                     target = message.getText();
                     String[] targetTokens = target.split(" ",2);
@@ -247,7 +274,6 @@ public class PlayerHandler extends Thread{
         msg = server.gatherVotes();
         sendMessage(msg);
 
-        // here i need a new wait
 
         waitPlayer();
 
@@ -264,7 +290,6 @@ public class PlayerHandler extends Thread{
         } else{
             server.mayorResponse("yes");
         }
-
     }
 
     public String talkToVictim(){
@@ -294,7 +319,7 @@ public class PlayerHandler extends Thread{
 
     public void night(){
         try {
-            Thread.sleep(2000);
+            Thread.sleep(6000);
         } catch (InterruptedException interruptedException) {
             interruptedException.printStackTrace();
         }

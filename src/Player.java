@@ -11,7 +11,6 @@ public class Player {
     private int port;
     private String name;
     private Role role;
-    private boolean isAwake;
     Reader reader;
     Writer writer;
 
@@ -19,7 +18,6 @@ public class Player {
 
     public Player() {
         port = setPort();
-        this.isAwake = true;
     }
 
 
@@ -75,6 +73,8 @@ public class Player {
                 if(msg.startsWith("you are out")){
                     writer.interrupt();
                 }
+                if(msg.startsWith("mafia") || msg.startsWith("city"))
+                    System.exit(0);
             }
         }
     }

@@ -19,9 +19,9 @@ public class Doctor extends Citizen{
         String response = "";
 
         try {
-            out.writeObject(new Message("\nchoose one of your teammates to heal"));
+            out.writeObject(new Message("\nchoose one of players to heal"));
             out.writeObject(new Message("you can heal yourself just 1 time"));
-            out.writeObject(new Message("following citizens are alive"));
+            out.writeObject(new Message("following players are alive"));
             out.writeObject(new Message(server.getList()));
 
 
