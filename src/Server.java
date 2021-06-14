@@ -190,6 +190,22 @@ public class Server {
         return accept;
     }
 
+    public boolean acceptableSniperShot(String name){
+        boolean accept = false;
+        String sniperName = findByRole("Sniper").getPlayerName();
+        if((getList().contains(name) && (!name.equals(sniperName))) || (name.equalsIgnoreCase("no")) )
+            accept = true;
+        return accept;
+    }
+
+    public PlayerHandler sniperConclusion(String name){
+        PlayerHandler player = findHandler(name);
+        if(player.getPlayerRole() instanceof Mafia)
+            return player;
+        else
+            return findByRole("Sniper");
+    }
+
     public Role checkRole(String name){
         Role role = findHandler(name).getPlayerRole();
         return role;

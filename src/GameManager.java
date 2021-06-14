@@ -12,6 +12,7 @@ public class GameManager extends Thread {
    private PlayerHandler mafiaTarget;
    private PlayerHandler healedMafia;
    private PlayerHandler healedByDoctor;
+   private PlayerHandler sniperTarget;
 
 
     public GameManager(Vector<PlayerHandler> players, int numberOfPlayers, Server server) {
@@ -61,9 +62,8 @@ public class GameManager extends Thread {
         notifyPlayers();
         sleepGame(10000);
         mafiaTime();
+
         citizenTime();
-
-
 
 
     }
@@ -102,6 +102,8 @@ public class GameManager extends Thread {
         doctorTime();
 
         detectiveTime();
+
+        sniperTime();
     }
 
     private void doctorTime(){
@@ -123,10 +125,33 @@ public class GameManager extends Thread {
             System.out.println("detective checked " + checkedRole);
             sleepGame(5000);
         } else {
+            System.out.println("detective has been killed");
             sleepGame(5000);
         }
 
     }
+
+    private void sniperTime(){
+        if(server.checkAlive("Sniper")){
+            String sniperChoice = server.findByRole("Sniper").actionCall();
+            sleepGame(10 * 1000);
+            if(!sniperChoice.equalsIgnoreCase("no")){
+                System.out.println("sniper choice: "  + sniperChoice);
+                this.sniperTarget = server.sniperConclusion(sniperChoice);
+                sleepGame(5000);
+            }else{
+                System.out.println("sniper did not shot");
+                this.sniperTarget = null;
+                sleepGame(5000);
+            }
+        } else {
+            System.out.println("sniper has been killed");
+            this.sniperTarget = null;
+            sleepGame(5000);
+        }
+
+    }
+
 
     public void notifyPlayers(){
         for (PlayerHandler player : players)
