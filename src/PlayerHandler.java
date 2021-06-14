@@ -14,6 +14,7 @@ public class PlayerHandler extends Thread{
     private Thread chat;
     private Thread vote;
     private boolean healed;
+    private boolean muted;
 
 
     public PlayerHandler( Server server,Socket socket) {
@@ -28,6 +29,7 @@ public class PlayerHandler extends Thread{
         isReady = false;
         isAlive = true;
         healed = false;
+        muted = false;
     }
 
     String msg = "";
@@ -162,7 +164,7 @@ public class PlayerHandler extends Thread{
 
             @Override
             public void run() {
-                while (chatTime){
+                while (chatTime && (!muted)){
                     message = getMessage();
                     msg = message.getText();
                     System.out.println(msg);
@@ -371,5 +373,13 @@ public class PlayerHandler extends Thread{
 
     public void setHealed(boolean healed) {
         this.healed = healed;
+    }
+
+    public boolean isMuted() {
+        return muted;
+    }
+
+    public void setMuted(boolean muted) {
+        this.muted = muted;
     }
 }

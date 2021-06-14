@@ -3,6 +3,10 @@ import java.io.ObjectOutputStream;
 
 public abstract class Citizen extends Role{
 
+    public Citizen() {
+        super();
+    }
+
     @Override
     public abstract String toString();
 

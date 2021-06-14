@@ -198,6 +198,14 @@ public class Server {
         return accept;
     }
 
+    public boolean acceptablePsychoChoice(String name){
+        boolean accept = false;
+        String psychoName = findByRole("Psychologist").getPlayerName();
+        if((getList().contains(name) && (!name.equals(psychoName))) || (name.equalsIgnoreCase("no")) )
+            accept = true;
+        return accept;
+    }
+
     public PlayerHandler sniperConclusion(String name){
         PlayerHandler player = findHandler(name);
         if(player.getPlayerRole() instanceof Mafia)
@@ -301,32 +309,37 @@ public class Server {
             e.printStackTrace();
         }
 
-        player = null;
 
-        System.out.println(victim + " removed");
+
+        System.out.println(player.getPlayerName() + " removed");
         for(PlayerHandler playerHandler : playerHandlers){
-            playerHandler.sendMessage(victim + " removed");
+            playerHandler.sendMessage(player.getPlayerName() + " removed");
         }
+        player = null;
+    }
+
+    public void talkingToVictim(PlayerHandler player){
+        String response = player.talkToVictim();
+        if(response.equals("yes")){
+            player.sendMessage("you are out but you can watch game");
+            player.setAlive(false);
+            removedRoles.add(player.getPlayerRole());
+
+
+            System.out.println(victim + " removed");
+            for (PlayerHandler playerHandler : playerHandlers){
+                if(playerHandler.playerIsAlive())
+                    playerHandler.sendMessage(victim + " removed");
+            }
+        }
+        else
+            removePlayer(player);
     }
 
     public void mayorResponse(String response){
         if(response.equals("yes")){
             PlayerHandler player = findHandler(victim);
-            response = player.talkToVictim();
-            if(response.equals("yes")){
-                player.sendMessage("you are out but you can watch game");
-                player.setAlive(false);
-                removedRoles.add(player.getPlayerRole());
-
-
-                System.out.println(victim + " removed");
-                for (PlayerHandler playerHandler : playerHandlers){
-                    if(playerHandler.playerIsAlive())
-                        playerHandler.sendMessage(victim + " removed");
-                }
-            }
-            else
-                removePlayer(player);
+            talkingToVictim(player);
 
         }else{
             System.out.println("voting canceled by mayor");
@@ -334,16 +347,8 @@ public class Server {
             for(PlayerHandler playerHandler : playerHandlers)
                 playerHandler.sendMessage("voting canceled by mayor");
             victim = "";
-
         }
         gameManager.canStartNight = true;
-    }
-
-    public void notifySinglePlayer(PlayerHandler player){
-        synchronized (player){
-            player.notify();
-        }
-
     }
 
     public boolean checkAlive(String role){
@@ -374,6 +379,10 @@ public class Server {
             }
         }
         return playerHandler;
+    }
+
+    public ArrayList<Role> getRemovedRoles() {
+        return removedRoles;
     }
 
     public static void main(String[] args) {

@@ -13,6 +13,8 @@ public class GameManager extends Thread {
    private PlayerHandler healedMafia;
    private PlayerHandler healedByDoctor;
    private PlayerHandler sniperTarget;
+   private PlayerHandler psychologistTarget;
+   private boolean checkRemovedRoles;
 
 
     public GameManager(Vector<PlayerHandler> players, int numberOfPlayers, Server server) {
@@ -54,17 +56,22 @@ public class GameManager extends Thread {
         while (!outOfVote)
         {}
         System.out.println("It is night");
-        server.notifySinglePlayer(server.findByRole("Mayor"));
         sleepGame(10000);
         while (!allWaiting())
         {}
 
         notifyPlayers();
         sleepGame(10000);
+
         mafiaTime();
 
         citizenTime();
 
+        nightConclusion();
+
+        notifyPlayers();
+
+        canStartNight = false;
 
     }
 
@@ -78,9 +85,11 @@ public class GameManager extends Thread {
             this.mafiaTarget = server.findHandler(target);
             sleepGame(5000);
         } else {
+            System.out.println("Godfather has been killed");
             server.findVictim();
             String target = server.getVictim();
             this.mafiaTarget = server.findHandler(target);
+            System.out.println(mafiaTarget.getPlayerName() + " chose by voting");
             sleepGame(5000);
         }
 
@@ -104,6 +113,10 @@ public class GameManager extends Thread {
         detectiveTime();
 
         sniperTime();
+
+        psychologistTime();
+
+        bulletproofTime();
     }
 
     private void doctorTime(){
@@ -138,6 +151,7 @@ public class GameManager extends Thread {
             if(!sniperChoice.equalsIgnoreCase("no")){
                 System.out.println("sniper choice: "  + sniperChoice);
                 this.sniperTarget = server.sniperConclusion(sniperChoice);
+                System.out.println("sniper victim: " + sniperTarget.getPlayerName());
                 sleepGame(5000);
             }else{
                 System.out.println("sniper did not shot");
@@ -152,6 +166,82 @@ public class GameManager extends Thread {
 
     }
 
+    private void psychologistTime(){
+        if(server.checkAlive("Psychologist")){
+            String psychoChoice = server.findByRole("Psychologist").actionCall();
+
+            if(!psychoChoice.equalsIgnoreCase("no")){
+                System.out.println("Psychologist choice: "  + psychoChoice);
+                this.psychologistTarget = server.sniperConclusion(psychoChoice);
+                System.out.println("Psychologist victim: " + psychologistTarget.getPlayerName());
+                sleepGame(5000);
+            } else {
+                System.out.println("Psychologist did not mute");
+                this.psychologistTarget = null;
+                sleepGame(5000);
+            }
+        } else {
+            System.out.println("Psychologist has been killed");
+            this.psychologistTarget = null;
+            sleepGame(5000);
+        }
+    }
+
+    private void bulletproofTime(){
+        if(server.checkAlive("Bulletproof")){
+            String bulletChoice = server.findByRole("Bulletproof").actionCall();
+            if(bulletChoice.equalsIgnoreCase("no")){
+                System.out.println("Bulletproof didn't check");
+                this.checkRemovedRoles = false;
+                sleepGame(5000);
+            } else {
+                System.out.println("Bulletproof accepted");
+                this.checkRemovedRoles = true;
+                sleepGame(5000);
+            }
+        } else {
+            this.checkRemovedRoles = false;
+            sleepGame(5000);
+        }
+    }
+
+    private void nightConclusion(){
+        if(mafiaTarget != null && mafiaTarget != healedByDoctor){
+            mafiaTarget.getPlayerRole().decreaseHealth();
+            if(mafiaTarget.getPlayerRole().getHealth() == 0){
+                server.talkingToVictim(mafiaTarget);
+            }
+        }
+        if(sniperTarget != null && sniperTarget != healedByDoctor && sniperTarget != healedMafia){
+            sniperTarget.getPlayerRole().decreaseHealth();
+            if(sniperTarget.getPlayerRole().getHealth() == 0){
+                server.talkingToVictim(sniperTarget);
+            }
+        }
+        if(checkRemovedRoles){
+            //removed roles should be sent to all
+            ArrayList<Role> removedRoles = server.getRemovedRoles();
+            Collections.shuffle(removedRoles);
+            String roles = "";
+            for (Role role : removedRoles)
+                roles += role + "\n";
+            for (PlayerHandler player : players)
+                player.sendMessage("\nkilled roles\n" + roles);
+            checkRemovedRoles = false;
+        }
+
+        if(psychologistTarget != null) {
+            psychologistTarget.setMuted(true);
+            System.out.println(psychologistTarget.getPlayerName() + " is muted for next round");
+            // a message should be sent to the player and others
+
+            psychologistTarget.sendMessage("you are muted next round");
+            for (PlayerHandler player : players){
+                if(player != psychologistTarget)
+                    player.sendMessage(psychologistTarget.getPlayerName() + " is muted for next round");
+            }
+        }
+    }
 
     public void notifyPlayers(){
         for (PlayerHandler player : players)

@@ -3,6 +3,10 @@ import java.io.ObjectOutputStream;
 
 public class SimpleCitizen extends Citizen{
 
+    public SimpleCitizen() {
+        super();
+    }
+
     @Override
     public String toString() {
         return "SimpleCitizen";

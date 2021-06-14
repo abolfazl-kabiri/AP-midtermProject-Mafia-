@@ -3,6 +3,11 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 
 public class DrLector extends Mafia{
+
+    public DrLector() {
+        super();
+    }
+
     @Override
     public String toString() {
         return "DrLecter";

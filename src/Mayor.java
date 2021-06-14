@@ -3,6 +3,11 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 
 public class Mayor extends Citizen{
+
+    public Mayor() {
+        super();
+    }
+
     @Override
     public String toString() {
         return "Mayor";

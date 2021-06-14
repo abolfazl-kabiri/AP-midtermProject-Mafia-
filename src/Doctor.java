@@ -4,6 +4,10 @@ import java.io.ObjectOutputStream;
 
 public class Doctor extends Citizen{
 
+    public Doctor() {
+        super();
+    }
+
     @Override
     public String toString() {
         return "Doctor";

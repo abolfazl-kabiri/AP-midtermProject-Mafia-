@@ -3,6 +3,11 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 
 public class Godfather extends Mafia{
+
+    public Godfather() {
+        super();
+    }
+
     @Override
     public String toString() {
         return "Godfather";

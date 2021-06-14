@@ -4,6 +4,10 @@ import java.io.ObjectOutputStream;
 
 public abstract class Mafia extends Role{
 
+    public Mafia() {
+        super();
+    }
+
     @Override
     public abstract String toString();
 

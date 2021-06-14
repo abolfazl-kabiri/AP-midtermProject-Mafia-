@@ -3,6 +3,11 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 
 public class Sniper extends Citizen{
+
+    public Sniper() {
+        super();
+    }
+
     @Override
     public String toString() {
         return "Sniper";

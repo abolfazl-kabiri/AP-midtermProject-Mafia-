@@ -3,6 +3,10 @@ import java.io.ObjectOutputStream;
 
 public class SimpleMafia extends Mafia{
 
+    public SimpleMafia() {
+        super();
+    }
+
     @Override
     public String toString() {
         return "SimpleMafia";
