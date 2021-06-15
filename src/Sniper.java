@@ -1,6 +1,7 @@
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.net.SocketException;
 
 /**
  * The type Sniper.
@@ -45,6 +46,8 @@ public class Sniper extends Citizen{
                         out.writeObject(new Message("unacceptable try again"));
 
                 }
+
+        } catch (SocketException s){
 
         } catch (ClassNotFoundException e) {
             e.printStackTrace();

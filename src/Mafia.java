@@ -1,6 +1,7 @@
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.net.SocketException;
 
 /**
  * The type Mafia.
@@ -51,6 +52,8 @@ public abstract class Mafia extends Role{
                     out.writeObject(new Message("unacceptable try again"));
             }
             System.out.println("target received " + target);
+
+        } catch (SocketException s){
 
         } catch (IOException e) {
             e.printStackTrace();

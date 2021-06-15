@@ -1,6 +1,7 @@
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.net.SocketException;
 
 /**
  * The type Dr lector.
@@ -44,6 +45,8 @@ public class DrLector extends Mafia{
                 else
                     out.writeObject(new Message("unacceptable try again"));
             }
+
+        } catch (SocketException s){
 
         } catch (IOException e) {
             e.printStackTrace();

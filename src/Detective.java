@@ -1,6 +1,7 @@
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.net.SocketException;
 
 /**
  * The type Detective.
@@ -52,6 +53,8 @@ public class Detective extends Citizen{
                 out.writeObject(new Message("is not mafia"));
             else
                 out.writeObject(new Message("is mafia"));
+        } catch (SocketException s){
+
         } catch (IOException e) {
             e.printStackTrace();
         } catch (ClassNotFoundException e) {

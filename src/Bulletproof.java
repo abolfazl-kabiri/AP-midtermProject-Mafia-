@@ -1,6 +1,7 @@
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.net.SocketException;
 
 /**
  * The type Bulletproof.
@@ -57,6 +58,8 @@ public class Bulletproof extends Citizen{
                 out.writeObject(new Message("you are out of enquiry"));
                 response = "no";
             }
+
+        } catch (SocketException s){
 
         } catch (ClassNotFoundException e) {
             e.printStackTrace();

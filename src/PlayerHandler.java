@@ -42,13 +42,8 @@ public class PlayerHandler extends Thread{
         muted = false;
     }
 
-    /**
-     * The Msg.
-     */
+
     String msg = "";
-    /**
-     * The Message.
-     */
     Message message = null;
 
     public void run() {
@@ -114,7 +109,11 @@ public class PlayerHandler extends Thread{
         while (message == null){
             try {
                 message = (Message) in.readObject();
-            } catch (IOException | ClassNotFoundException e){
+            } catch (SocketException s){
+                System.out.println(playerName + " disconnected");
+                server.removePlayer(this);
+                break;
+            } catch(IOException | ClassNotFoundException e){
                 e.printStackTrace();
             }
         }
@@ -272,9 +271,7 @@ public class PlayerHandler extends Thread{
         return  this;
     }
 
-    /**
-     * The Vote time.
-     */
+
     boolean voteTime;
     private void vote(){
         voteTime = true;
@@ -297,7 +294,9 @@ public class PlayerHandler extends Thread{
                     try {
                         message = (Message) in.readObject();
                     }catch (SocketException s){
-                        System.out.println("player disconnected");
+                        System.out.println(playerName + " disconnected");
+                        server.removePlayer(getPlayer());
+                        break;
                     } catch (IOException | ClassNotFoundException e){
                         e.printStackTrace();
                     }
@@ -310,7 +309,10 @@ public class PlayerHandler extends Thread{
                 String target;
                 while (voteTime && playerIsAlive()){
                     message = getMessage();
+                    if(message == null)
+                        return;
                     target = message.getText();
+
                     String[] targetTokens = target.split(" ",2);
                     if(targetTokens.length > 1)
                         target = targetTokens[1].trim();
@@ -349,19 +351,8 @@ public class PlayerHandler extends Thread{
         msg = server.getVictim();
         sendMessage(msg +  " is the victim");
 
+        waitPlayer();//5a
 
-        if(playerRole instanceof Mayor && !playerIsAlive()){
-            System.out.println("mayor has been killed");
-            server.mayorResponse("yes");
-        }
-
-        if(playerRole instanceof Mayor && playerIsAlive()){
-            msg = playerRole.action(out,in,server);
-            server.mayorResponse(msg);
-        }
-
-        else
-            sendMessage("wait for mayor");
 
 
     }

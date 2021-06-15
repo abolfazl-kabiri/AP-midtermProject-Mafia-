@@ -1,6 +1,7 @@
 import java.io.*;
 import java.net.ConnectException;
 import java.net.Socket;
+import java.net.SocketException;
 import java.net.UnknownHostException;
 import java.util.InputMismatchException;
 import java.util.Scanner;
@@ -127,6 +128,8 @@ public class Player {
         while (message == null){
             try {
                 message = (Message) in.readObject();
+            } catch (SocketException s){
+
             } catch (ClassNotFoundException e){
                 e.printStackTrace();
             } catch (EOFException e){

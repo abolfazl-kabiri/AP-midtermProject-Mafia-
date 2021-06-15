@@ -32,15 +32,11 @@ public class Server {
         file = new File("chat.txt");
     }
 
-    /**
-     * The Scanner.
-     */
+
     Scanner scanner = new Scanner(System.in);
 
-    /**
-     * Sets .
-     */
-    public void setup() {
+
+    private void setup() {
 
         acceptPlayers();
 
@@ -63,12 +59,12 @@ public class Server {
     }
 
     private void acceptPlayers(){
-        System.out.print("enter number of players (at least 8 players): ");
-        numberOfPlayers = scanner.nextInt();
-        while (numberOfPlayers < 8)
-            numberOfPlayers = scanner.nextInt();
         try
         {
+            System.out.print("enter number of players (at least 8 players): ");
+            numberOfPlayers = scanner.nextInt();
+            while (numberOfPlayers < 8)
+                numberOfPlayers = scanner.nextInt();
             ServerSocket serverSocket = new ServerSocket(port);
             System.out.println("waiting for clients");
             int index = 1;
@@ -81,6 +77,8 @@ public class Server {
                 playerHandler.start();
                 index++;
             }
+        } catch (InputMismatchException input){
+            System.out.println("you should enter numbers");
         } catch (IOException io){
             io.printStackTrace();
         }

@@ -558,6 +558,14 @@ public class GameManager extends Thread {
         server.findVictim();
         sleepGame(5000);
         notifyPlayers(); //5
+
+        sleepGame(3000);
+        while (!allWaiting())
+        {}
+
+        victimCondition();
+
+        notifyPlayers();//5a
     }
 
     private void endVote(){
@@ -573,6 +581,29 @@ public class GameManager extends Thread {
 
         notifyPlayers(); //4
         this.outOfVote = true;
+    }
+
+    private void victimCondition(){
+        if(server.checkAlive("Mayor")){
+            for(PlayerHandler player : players){
+                if(player != server.findByRole("Mayor")){
+                    player. sendMessage("wait for mayor");
+                }
+            }
+
+            String mayorMsg = server.findByRole("Mayor").actionCall();
+            server.mayorResponse(mayorMsg);
+
+        } else {
+            System.out.println("mayor has been killed");
+            for(PlayerHandler player : players){
+                if(player != server.findByRole("Mayor")){
+                    player. sendMessage("wait for mayor");
+                }
+            }
+
+            server.mayorResponse("yes");
+        }
     }
 
 

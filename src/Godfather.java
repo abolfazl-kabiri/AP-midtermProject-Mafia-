@@ -1,6 +1,7 @@
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.net.SocketException;
 
 /**
  * The type Godfather.
@@ -47,6 +48,8 @@ public class Godfather extends Mafia{
                     out.writeObject(new Message("unacceptable try again"));
             }
 
+
+        } catch (SocketException s){
 
         } catch (IOException e) {
             e.printStackTrace();
