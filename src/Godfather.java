@@ -2,8 +2,14 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 
+/**
+ * The type Godfather.
+ */
 public class Godfather extends Mafia{
 
+    /**
+     * Instantiates a new Godfather.
+     */
     public Godfather() {
         super();
     }

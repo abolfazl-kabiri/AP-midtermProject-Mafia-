@@ -2,8 +2,14 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 
+/**
+ * The type Psychologist.
+ */
 public class Psychologist extends Citizen{
 
+    /**
+     * Instantiates a new Psychologist.
+     */
     public Psychologist() {
         super();
     }

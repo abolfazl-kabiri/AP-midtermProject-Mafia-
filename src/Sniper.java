@@ -2,8 +2,14 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 
+/**
+ * The type Sniper.
+ */
 public class Sniper extends Citizen{
 
+    /**
+     * Instantiates a new Sniper.
+     */
     public Sniper() {
         super();
     }

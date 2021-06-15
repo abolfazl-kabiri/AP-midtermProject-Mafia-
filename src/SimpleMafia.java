@@ -1,8 +1,14 @@
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 
+/**
+ * The type Simple mafia.
+ */
 public class SimpleMafia extends Mafia{
 
+    /**
+     * Instantiates a new Simple mafia.
+     */
     public SimpleMafia() {
         super();
     }

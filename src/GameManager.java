@@ -1,6 +1,9 @@
 import java.util.*;
 
 
+/**
+ * The type Game manager.
+ */
 public class GameManager extends Thread {
 
    private Vector<PlayerHandler> players;
@@ -17,6 +20,13 @@ public class GameManager extends Thread {
    private boolean checkRemovedRoles;
 
 
+    /**
+     * Instantiates a new Game manager.
+     *
+     * @param players         the players
+     * @param numberOfPlayers the number of players
+     * @param server          the server
+     */
     public GameManager(Vector<PlayerHandler> players, int numberOfPlayers, Server server) {
         this.players = players;
         this.server = server;
@@ -59,6 +69,11 @@ public class GameManager extends Thread {
     }
 
 
+    /**
+     * Continue game boolean.
+     *
+     * @return the boolean
+     */
     public boolean continueGame(){
         if(numberOfMafias >= numberOfCitizens){
             System.out.println("mafia is winner");
@@ -110,7 +125,14 @@ public class GameManager extends Thread {
         System.out.println("number of citizens: " + numberOfCitizens);
     }
 
+    /**
+     * The Can start night.
+     */
     boolean canStartNight = false;
+
+    /**
+     * Night.
+     */
     public void night(){
         while (!outOfVote)
         {}
@@ -119,8 +141,8 @@ public class GameManager extends Thread {
         while (!allWaiting())
         {}
 
-        notifyPlayers();
-        sleepGame(10000);
+        notifyPlayers(); //6
+        sleepGame(5000);
 
         mafiaTime();
 
@@ -128,7 +150,7 @@ public class GameManager extends Thread {
 
         nightConclusion();
 
-        notifyPlayers();
+    //    notifyPlayers(); //7
 
         canStartNight = false;
 
@@ -138,6 +160,14 @@ public class GameManager extends Thread {
         server.mafiaConsult();
 
         sleepGame(6000);
+
+        godfatherTime();
+
+        lecterTime();
+
+    }
+
+    private void godfatherTime(){
         if(server.checkAlive("Godfather")){
             String target = server.findByRole("Godfather").actionCall();
             System.out.println("godfather choice: " + target);
@@ -151,7 +181,9 @@ public class GameManager extends Thread {
             System.out.println(mafiaTarget.getPlayerName() + " chose by voting");
             sleepGame(5000);
         }
+    }
 
+    private void lecterTime(){
         if(lecterCondition()){
             String healed = server.findByRole("DrLecter").actionCall();
             System.out.println("lecter choice: " + healed);
@@ -162,7 +194,6 @@ public class GameManager extends Thread {
             this.healedMafia = null;
             sleepGame(5000);
         }
-
     }
 
     private boolean lecterCondition(){
@@ -313,6 +344,9 @@ public class GameManager extends Thread {
         server.getVotes().clear();
     }
 
+    /**
+     * Notify players.
+     */
     public void notifyPlayers(){
         for (PlayerHandler player : players)
         {
@@ -322,6 +356,11 @@ public class GameManager extends Thread {
         }
     }
 
+    /**
+     * Remove player.
+     *
+     * @param player the player
+     */
     public void removePlayer(PlayerHandler player){
         synchronized (player){
             players.remove(player);
@@ -329,6 +368,11 @@ public class GameManager extends Thread {
 
     }
 
+    /**
+     * All waiting boolean.
+     *
+     * @return the boolean
+     */
     public boolean allWaiting(){
         boolean waiting = true;
         synchronized (players){
@@ -400,6 +444,9 @@ public class GameManager extends Thread {
         notifyPlayers();
     }
 
+    /**
+     * Introductions.
+     */
     public void introductions(){
 
         while (!(allWaiting())){
@@ -442,7 +489,7 @@ public class GameManager extends Thread {
     private void chat(){
 
         while (!(allWaiting())){ }
-        notifyPlayers();
+        notifyPlayers(); //1
         exitChat = false;
         System.out.println("It is day\n");
 
@@ -475,7 +522,7 @@ public class GameManager extends Thread {
 
         while (!allWaiting())
         {}
-        notifyPlayers();
+        notifyPlayers(); //2
         this.exitChat = true;
     }
 
@@ -491,7 +538,7 @@ public class GameManager extends Thread {
 
         System.out.println("\nvoting");
         sleepGame(3000);
-        notifyPlayers();
+        notifyPlayers(); //3
 
         Timer timer = new Timer();
 
@@ -509,8 +556,8 @@ public class GameManager extends Thread {
         {}
 
         server.findVictim();
-        sleepGame(2000);
-        notifyPlayers();
+        sleepGame(5000);
+        notifyPlayers(); //5
     }
 
     private void endVote(){
@@ -523,7 +570,8 @@ public class GameManager extends Thread {
 
         while (!allWaiting())
         {}
-        notifyPlayers();
+
+        notifyPlayers(); //4
         this.outOfVote = true;
     }
 

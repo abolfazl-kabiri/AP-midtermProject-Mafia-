@@ -2,8 +2,14 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 
+/**
+ * The type Mayor.
+ */
 public class Mayor extends Citizen{
 
+    /**
+     * Instantiates a new Mayor.
+     */
     public Mayor() {
         super();
     }

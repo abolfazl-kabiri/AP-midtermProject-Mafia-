@@ -2,8 +2,14 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 
+/**
+ * The type Dr lector.
+ */
 public class DrLector extends Mafia{
 
+    /**
+     * Instantiates a new Dr lector.
+     */
     public DrLector() {
         super();
     }

@@ -2,8 +2,14 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 
+/**
+ * The type Mafia.
+ */
 public abstract class Mafia extends Role{
 
+    /**
+     * Instantiates a new Mafia.
+     */
     public Mafia() {
         super();
     }
@@ -14,6 +20,14 @@ public abstract class Mafia extends Role{
     @Override
     public abstract String action(ObjectOutputStream out, ObjectInputStream in, Server server);
 
+    /**
+     * Mafia chat string.
+     *
+     * @param out    the out
+     * @param in     the in
+     * @param server the server
+     * @return the string
+     */
     public String mafiaChat(ObjectOutputStream out, ObjectInputStream in, Server server){
         boolean accepted = false;
         String target = "";

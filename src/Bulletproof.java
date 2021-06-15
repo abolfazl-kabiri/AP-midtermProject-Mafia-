@@ -2,10 +2,16 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 
+/**
+ * The type Bulletproof.
+ */
 public class Bulletproof extends Citizen{
 
     private int remainingChecks;
 
+    /**
+     * Instantiates a new Bulletproof.
+     */
     public Bulletproof() {
         this.health = 2;
         remainingChecks = 2;

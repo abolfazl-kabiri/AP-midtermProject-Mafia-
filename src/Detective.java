@@ -2,9 +2,15 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 
+/**
+ * The type Detective.
+ */
 public class Detective extends Citizen{
 
 
+    /**
+     * Instantiates a new Detective.
+     */
     public Detective() {
         super();
     }

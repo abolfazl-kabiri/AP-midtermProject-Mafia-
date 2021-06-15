@@ -5,6 +5,9 @@ import java.net.UnknownHostException;
 import java.util.InputMismatchException;
 import java.util.Scanner;
 
+/**
+ * The type Player.
+ */
 public class Player {
 
     private Socket socket;
@@ -13,17 +16,31 @@ public class Player {
     private int port;
     private String name;
     private Role role;
+    /**
+     * The Reader.
+     */
     Reader reader;
+    /**
+     * The Writer.
+     */
     Writer writer;
 
+    /**
+     * The Scanner.
+     */
     Scanner scanner = new Scanner(System.in);
 
+    /**
+     * Instantiates a new Player.
+     */
     public Player() {
         port = setPort();
     }
 
 
-
+    /**
+     * Start.
+     */
     public void start() {
         try {
             socket = new Socket("127.0.0.1",port);
@@ -55,10 +72,18 @@ public class Player {
     }
 
 
-
+    /**
+     * The Message.
+     */
     Message message = null;
+    /**
+     * The Msg.
+     */
     String msg = "";
 
+    /**
+     * The type Reader.
+     */
     class Reader extends Thread{
         @Override
         public void run() {
@@ -83,6 +108,9 @@ public class Player {
         }
     }
 
+    /**
+     * The type Writer.
+     */
     class Writer extends Thread{
         @Override
         public void run() {
@@ -195,6 +223,11 @@ public class Player {
         writer.start();
     }
 
+    /**
+     * Sets role.
+     *
+     * @param role the role
+     */
     public void setRole(Role role) {
         this.role = role;
     }
@@ -213,6 +246,11 @@ public class Player {
         return port;
     }
 
+    /**
+     * The entry point of application.
+     *
+     * @param args the input arguments
+     */
     public static void main(String[] args) {
         Player player = new Player();
         player.start();

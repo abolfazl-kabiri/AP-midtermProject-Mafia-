@@ -2,6 +2,9 @@ import java.io.*;
 import java.net.Socket;
 import java.net.SocketException;
 
+/**
+ * The type Player handler.
+ */
 public class PlayerHandler extends Thread{
 
     private Server server;
@@ -18,6 +21,12 @@ public class PlayerHandler extends Thread{
     private boolean muted;
 
 
+    /**
+     * Instantiates a new Player handler.
+     *
+     * @param server the server
+     * @param socket the socket
+     */
     public PlayerHandler( Server server,Socket socket) {
         this.server = server;
         this.socket = socket;
@@ -33,7 +42,13 @@ public class PlayerHandler extends Thread{
         muted = false;
     }
 
+    /**
+     * The Msg.
+     */
     String msg = "";
+    /**
+     * The Message.
+     */
     Message message = null;
 
     public void run() {
@@ -49,11 +64,11 @@ public class PlayerHandler extends Thread{
 
         while (true){
 
-            waitPlayer();
+            waitPlayer(); //1
 
             handleChatTime();
 
-            waitPlayer();
+            waitPlayer();//3
 
             unmute();
 
@@ -62,7 +77,7 @@ public class PlayerHandler extends Thread{
             if (!server.gameContinues())
                 break;
 
-            waitPlayer();
+            waitPlayer(); //6
 
             night();
 
@@ -85,6 +100,11 @@ public class PlayerHandler extends Thread{
 
     }
 
+    /**
+     * Gets socket.
+     *
+     * @return the socket
+     */
     public Socket getSocket() {
         return socket;
     }
@@ -101,10 +121,20 @@ public class PlayerHandler extends Thread{
         return message;
     }
 
+    /**
+     * Gets player name.
+     *
+     * @return the player name
+     */
     public String getPlayerName() {
         return playerName;
     }
 
+    /**
+     * Set msg.
+     *
+     * @param msg the msg
+     */
     public void setMsg(String msg){
         this.msg = msg;
     }
@@ -158,7 +188,14 @@ public class PlayerHandler extends Thread{
     }
 
 
+    /**
+     * The Chat time.
+     */
     boolean chatTime;
+
+    /**
+     * Handle chat time.
+     */
     public void handleChatTime(){
         chatTime = true;
         if(playerIsAlive()){
@@ -228,13 +265,16 @@ public class PlayerHandler extends Thread{
         chat = new ChatHandler();
 
         chat.start();
-        waitPlayer();
+        waitPlayer(); //2
     }
 
     private PlayerHandler getPlayer(){
         return  this;
     }
 
+    /**
+     * The Vote time.
+     */
     boolean voteTime;
     private void vote(){
         voteTime = true;
@@ -292,9 +332,9 @@ public class PlayerHandler extends Thread{
         vote = new VoteHandler();
         vote.start();
 
-        waitPlayer();
+        waitPlayer(); //4
         try {
-            Thread.sleep(2500);
+            Thread.sleep(5000);
         }catch (InterruptedException inter){
             inter.printStackTrace();
         }
@@ -304,27 +344,38 @@ public class PlayerHandler extends Thread{
         sendMessage(msg);
 
 
-        waitPlayer();
+        waitPlayer(); //5
 
         msg = server.getVictim();
         sendMessage(msg +  " is the victim");
 
-        if(!(playerRole instanceof Mayor)){
-            sendMessage("wait for mayor");
 
-        } else if(playerIsAlive()){
-           msg = playerRole.action(out,in,server);
-           server.mayorResponse(msg);
-
-        } else{
+        if(playerRole instanceof Mayor && !playerIsAlive()){
             System.out.println("mayor has been killed");
             server.mayorResponse("yes");
         }
+
+        if(playerRole instanceof Mayor && playerIsAlive()){
+            msg = playerRole.action(out,in,server);
+            server.mayorResponse(msg);
+        }
+
+        else
+            sendMessage("wait for mayor");
+
+
     }
 
+    /**
+     * Talk to victim string.
+     *
+     * @return the string
+     */
     public String talkToVictim(){
+
         String response = "";
         sendMessage("do you want to watch the rest?[yes/no]");
+
         message = getMessage();
         response = message.getText();
         String[] responseTokens = response.split(" ",2);
@@ -337,6 +388,9 @@ public class PlayerHandler extends Thread{
         return response;
     }
 
+    /**
+     * Wait player.
+     */
     public void waitPlayer(){
         try {
             synchronized (this){
@@ -347,6 +401,9 @@ public class PlayerHandler extends Thread{
         }
     }
 
+    /**
+     * Night.
+     */
     public void night(){
         try {
             Thread.sleep(3000);
@@ -355,19 +412,34 @@ public class PlayerHandler extends Thread{
         }
 
         sendMessage("It is night");
-        waitPlayer();
+      //  waitPlayer(); //7
 
     }
 
+    /**
+     * Mafia consult string.
+     *
+     * @return the string
+     */
     public String mafiaConsult(){
         String target = ((Mafia)playerRole).mafiaChat(out,in,server);
         return target;
     }
 
+    /**
+     * Action call string.
+     *
+     * @return the string
+     */
     public String actionCall(){
         return playerRole.action(out,in,server);
     }
 
+    /**
+     * Send message.
+     *
+     * @param msg the msg
+     */
     public void sendMessage(String msg) {
         try {
             if(msg != null)
@@ -382,6 +454,11 @@ public class PlayerHandler extends Thread{
         }
     }
 
+    /**
+     * Send message.
+     *
+     * @param role the role
+     */
     public void sendMessage(Role role){
         try{
             if(role != null)
@@ -391,42 +468,92 @@ public class PlayerHandler extends Thread{
         }
     }
 
+    /**
+     * Player is alive boolean.
+     *
+     * @return the boolean
+     */
     public boolean playerIsAlive(){
         return isAlive;
     }
 
+    /**
+     * Sets alive.
+     *
+     * @param alive the alive
+     */
     public void setAlive(boolean alive) {
         isAlive = alive;
     }
 
+    /**
+     * Is ready boolean.
+     *
+     * @return the boolean
+     */
     public boolean isReady() {
         return isReady;
     }
 
+    /**
+     * Set ready.
+     *
+     * @param ready the ready
+     */
     public void setReady(boolean ready){
         this.isReady = ready;
     }
 
+    /**
+     * Sets player name.
+     *
+     * @param playerName the player name
+     */
     public void setPlayerName(String playerName) {
         this.playerName = playerName;
     }
 
+    /**
+     * Sets player role.
+     *
+     * @param playerRole the player role
+     */
     public void setPlayerRole(Role playerRole) {
         this.playerRole = playerRole;
     }
 
+    /**
+     * Gets player role.
+     *
+     * @return the player role
+     */
     public Role getPlayerRole() {
         return playerRole;
     }
 
+    /**
+     * Is healed boolean.
+     *
+     * @return the boolean
+     */
     public boolean isHealed() {
         return healed;
     }
 
+    /**
+     * Sets healed.
+     *
+     * @param healed the healed
+     */
     public void setHealed(boolean healed) {
         this.healed = healed;
     }
 
+    /**
+     * Sets muted.
+     *
+     * @param muted the muted
+     */
     public void setMuted(boolean muted) {
         this.muted = muted;
     }

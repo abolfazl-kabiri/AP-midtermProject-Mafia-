@@ -2,8 +2,14 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 
+/**
+ * The type Doctor.
+ */
 public class Doctor extends Citizen{
 
+    /**
+     * Instantiates a new Doctor.
+     */
     public Doctor() {
         super();
     }

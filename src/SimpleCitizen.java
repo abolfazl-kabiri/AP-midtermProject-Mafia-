@@ -1,8 +1,14 @@
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 
+/**
+ * The type Simple citizen.
+ */
 public class SimpleCitizen extends Citizen{
 
+    /**
+     * Instantiates a new Simple citizen.
+     */
     public SimpleCitizen() {
         super();
     }

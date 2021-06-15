@@ -5,6 +5,9 @@ import java.util.*;
 import java.util.concurrent.ExecutorService;
 
 
+/**
+ * The type Server.
+ */
 public class Server {
 
     private int numberOfPlayers;
@@ -17,6 +20,9 @@ public class Server {
     private File file;
 
 
+    /**
+     * Instantiates a new Server.
+     */
     public Server() {
         playerHandlers = new Vector<>();
         playerNames = new ArrayList<>();
@@ -26,7 +32,14 @@ public class Server {
         file = new File("chat.txt");
     }
 
+    /**
+     * The Scanner.
+     */
     Scanner scanner = new Scanner(System.in);
+
+    /**
+     * Sets .
+     */
     public void setup() {
 
         acceptPlayers();
@@ -73,6 +86,11 @@ public class Server {
         }
     }
 
+    /**
+     * Broadcast.
+     *
+     * @param msg the msg
+     */
     public void broadcast(String msg){
             try (FileWriter fileWriter = new FileWriter(file,true)) {
               fileWriter.write(msg+"\n");
@@ -83,6 +101,11 @@ public class Server {
             p.sendMessage(msg);
     }
 
+    /**
+     * History.
+     *
+     * @param player the player
+     */
     public void history(PlayerHandler player){
         player.sendMessage("\nhistory");
         try {
@@ -101,6 +124,11 @@ public class Server {
         }
     }
 
+    /**
+     * All ready boolean.
+     *
+     * @return the boolean
+     */
     public boolean allReady(){
 
         synchronized (playerHandlers){
@@ -112,6 +140,12 @@ public class Server {
         }
     }
 
+    /**
+     * Check name boolean.
+     *
+     * @param name the name
+     * @return the boolean
+     */
     public boolean checkName(String name){
         boolean isValid = true;
         for(String n: playerNames){
@@ -125,10 +159,20 @@ public class Server {
         return isValid;
     }
 
+    /**
+     * Add new name.
+     *
+     * @param name the name
+     */
     public void addNewName(String name){
         playerNames.add(name);
     }
 
+    /**
+     * Get list string.
+     *
+     * @return the string
+     */
     public String getList(){
         String playerList = "";
         for (PlayerHandler player : playerHandlers){
@@ -138,6 +182,11 @@ public class Server {
         return playerList;
     }
 
+    /**
+     * Get citizen list string.
+     *
+     * @return the string
+     */
     public String getCitizenList(){
         String citizenList = "";
         for (PlayerHandler player : playerHandlers){
@@ -147,6 +196,11 @@ public class Server {
         return citizenList;
     }
 
+    /**
+     * Get mafia list string.
+     *
+     * @return the string
+     */
     public String getMafiaList(){
         String mafiaList = "";
         for (PlayerHandler player : playerHandlers){
@@ -156,6 +210,13 @@ public class Server {
         return mafiaList;
     }
 
+    /**
+     * Acceptable vote boolean.
+     *
+     * @param target     the target
+     * @param playerName the player name
+     * @return the boolean
+     */
     public boolean acceptableVote(String target, String playerName){
 
         if(target.equals(playerName))
@@ -169,6 +230,12 @@ public class Server {
         return false;
     }
 
+    /**
+     * Acceptable mafia consult boolean.
+     *
+     * @param name the name
+     * @return the boolean
+     */
     public boolean acceptableMafiaConsult(String name){
         boolean accepted = false;
         for(PlayerHandler player : playerHandlers){
@@ -180,6 +247,12 @@ public class Server {
         return accepted;
     }
 
+    /**
+     * Acceptable mafia heal boolean.
+     *
+     * @param name the name
+     * @return the boolean
+     */
     public boolean acceptableMafiaHeal(String name){
         boolean accepted = false;
 
@@ -198,6 +271,12 @@ public class Server {
         return accepted;
     }
 
+    /**
+     * Acceptable doctor heal boolean.
+     *
+     * @param name the name
+     * @return the boolean
+     */
     public boolean acceptableDoctorHeal(String name){
         boolean accepted = false;
 
@@ -216,6 +295,12 @@ public class Server {
         return accepted;
     }
 
+    /**
+     * Acceptable check role boolean.
+     *
+     * @param name the name
+     * @return the boolean
+     */
     public boolean acceptableCheckRole(String name){
         boolean accept = false;
         String detectiveName = findByRole("Detective").getPlayerName();
@@ -230,6 +315,12 @@ public class Server {
         return accept;
     }
 
+    /**
+     * Acceptable sniper shot boolean.
+     *
+     * @param name the name
+     * @return the boolean
+     */
     public boolean acceptableSniperShot(String name){
         boolean accept = false;
         String sniperName = findByRole("Sniper").getPlayerName();
@@ -248,6 +339,12 @@ public class Server {
         return accept;
     }
 
+    /**
+     * Acceptable psycho choice boolean.
+     *
+     * @param name the name
+     * @return the boolean
+     */
     public boolean acceptablePsychoChoice(String name){
         boolean accept = false;
         String psychoName = findByRole("Psychologist").getPlayerName();
@@ -266,6 +363,12 @@ public class Server {
         return accept;
     }
 
+    /**
+     * Sniper conclusion player handler.
+     *
+     * @param name the name
+     * @return the player handler
+     */
     public PlayerHandler sniperConclusion(String name){
         PlayerHandler player = findHandler(name);
         if(player.getPlayerRole() instanceof Mafia)
@@ -274,11 +377,23 @@ public class Server {
             return findByRole("Sniper");
     }
 
+    /**
+     * Check role role.
+     *
+     * @param name the name
+     * @return the role
+     */
     public Role checkRole(String name){
         Role role = findHandler(name).getPlayerRole();
         return role;
     }
 
+    /**
+     * Store votes.
+     *
+     * @param playerName the player name
+     * @param target     the target
+     */
     public void storeVotes(String playerName, String target){
         boolean votedBefore = false;
 
@@ -297,6 +412,11 @@ public class Server {
             votes.put(playerName,target);
     }
 
+    /**
+     * Gather votes string.
+     *
+     * @return the string
+     */
     public String gatherVotes(){
         String voteResult = "";
         Iterator<Map.Entry<String, String>> iterator = votes.entrySet().iterator();
@@ -308,6 +428,10 @@ public class Server {
     }
 
     private String victim = "";
+
+    /**
+     * Find victim.
+     */
     public void findVictim(){
         int maximumRepeat = 0;
         ArrayList<String> victims = new ArrayList<>();
@@ -343,10 +467,21 @@ public class Server {
         victims.clear();
     }
 
+    /**
+     * Gets victim.
+     *
+     * @return the victim
+     */
     public String getVictim() {
         return victim;
     }
 
+    /**
+     * Find handler player handler.
+     *
+     * @param name the name
+     * @return the player handler
+     */
     public PlayerHandler findHandler(String name){
         PlayerHandler playerHandler = null;
         for (PlayerHandler player : playerHandlers){
@@ -358,6 +493,11 @@ public class Server {
         return playerHandler;
     }
 
+    /**
+     * Remove player.
+     *
+     * @param player the player
+     */
     public void removePlayer(PlayerHandler player){
         try {
             player.setReady(true);
@@ -379,8 +519,15 @@ public class Server {
         }
     }
 
+    /**
+     * Talking to victim.
+     *
+     * @param player the player
+     */
     public void talkingToVictim(PlayerHandler player){
+
         String response = player.talkToVictim();
+
         try {
             Thread.sleep(5000);
         } catch (InterruptedException interruptedException) {
@@ -403,7 +550,13 @@ public class Server {
 
     }
 
+    /**
+     * Mayor response.
+     *
+     * @param response the response
+     */
     public void mayorResponse(String response){
+
         if(response.equals("yes")){
             PlayerHandler player = findHandler(victim);
             talkingToVictim(player);
@@ -421,6 +574,12 @@ public class Server {
         gameManager.canStartNight = true;
     }
 
+    /**
+     * Check alive boolean.
+     *
+     * @param role the role
+     * @return the boolean
+     */
     public boolean checkAlive(String role){
         boolean alive = false;
         for(PlayerHandler player : playerHandlers){
@@ -432,6 +591,9 @@ public class Server {
         return alive;
     }
 
+    /**
+     * Mafia consult.
+     */
     public void mafiaConsult(){
         for(PlayerHandler player : playerHandlers){
             if((!(player.getPlayerRole() instanceof Godfather)) && (player.getPlayerRole() instanceof Mafia) && player.playerIsAlive()){
@@ -440,6 +602,12 @@ public class Server {
         }
     }
 
+    /**
+     * Find by role player handler.
+     *
+     * @param role the role
+     * @return the player handler
+     */
     public PlayerHandler findByRole(String role){
         PlayerHandler playerHandler = null;
         for(PlayerHandler player : playerHandlers){
@@ -451,18 +619,38 @@ public class Server {
         return playerHandler;
     }
 
+    /**
+     * Gets removed roles.
+     *
+     * @return the removed roles
+     */
     public ArrayList<Role> getRemovedRoles() {
         return removedRoles;
     }
 
+    /**
+     * Game continues boolean.
+     *
+     * @return the boolean
+     */
     public boolean gameContinues(){
         return gameManager.continueGame();
     }
 
+    /**
+     * Gets votes.
+     *
+     * @return the votes
+     */
     public HashMap<String, String> getVotes() {
         return votes;
     }
 
+    /**
+     * The entry point of application.
+     *
+     * @param args the input arguments
+     */
     public static void main(String[] args) {
         Server server = new Server();
         server.setup();
