@@ -36,7 +36,7 @@ public class Psychologist extends Citizen{
                     out.writeObject(new Message("accepted"));
                 }
                 else
-                    out.writeObject("unacceptable try again");
+                    out.writeObject(new Message("unacceptable try again"));
 
             }
         } catch (ClassNotFoundException e) {

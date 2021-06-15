@@ -41,7 +41,6 @@ public class Detective extends Citizen{
 
             }
 
-            System.out.println("response is " + response);
             Role role = server.checkRole(response);
             if(role instanceof Citizen || role instanceof Godfather)
                 out.writeObject(new Message("is not mafia"));

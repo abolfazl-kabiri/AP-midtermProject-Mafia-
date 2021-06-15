@@ -1,6 +1,8 @@
 import java.io.*;
+import java.net.ConnectException;
 import java.net.Socket;
 import java.net.UnknownHostException;
+import java.util.InputMismatchException;
 import java.util.Scanner;
 
 public class Player {
@@ -43,6 +45,8 @@ public class Player {
             writer = new Writer();
             startThreads();
 
+        } catch (ConnectException c){
+            System.out.println("can not connect run the program again");
         } catch (UnknownHostException u) {
             u.printStackTrace();
         } catch (IOException io){
@@ -197,11 +201,13 @@ public class Player {
 
     private int setPort() {
         System.out.print("enter port: ");
-        port = scanner.nextInt();
-        //check statement
-
-
-
+        try {
+            port = scanner.nextInt();
+        } catch (InputMismatchException input){
+            System.out.println("you should enter port");
+            System.out.println("run the program again");
+            System.exit(0);
+        }
 
 
         return port;

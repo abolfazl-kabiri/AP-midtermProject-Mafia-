@@ -35,7 +35,7 @@ public class GameManager extends Thread {
 
         introductions();
 
-        while (continueGame()){
+        while (true){
             sleepGame(2000);
 
             chat();
@@ -46,11 +46,14 @@ public class GameManager extends Thread {
 
             update();
 
-            if(continueGame()){
-                night();
+            if(!continueGame())
+                break;
+            night();
 
-                update();
-            }
+            update();
+
+            if (!continueGame())
+                break;
         }
 
     }
@@ -99,16 +102,19 @@ public class GameManager extends Thread {
     }
 
     private void update(){
+        sleepGame(15000);
         updatePlayers();
         updateMafias();
         updateCitizens();
+        System.out.println("\nnumber of mafia: " + numberOfMafias);
+        System.out.println("number of citizens: " + numberOfCitizens);
     }
 
     boolean canStartNight = false;
     public void night(){
         while (!outOfVote)
         {}
-        System.out.println("It is night");
+        System.out.println("\nIt is night");
         sleepGame(10000);
         while (!allWaiting())
         {}
@@ -226,7 +232,6 @@ public class GameManager extends Thread {
             if(!psychoChoice.equalsIgnoreCase("no")){
                 System.out.println("Psychologist choice: "  + psychoChoice);
                 this.psychologistTarget = server.findHandler(psychoChoice);
-                System.out.println("Psychologist victim: " + psychologistTarget.getPlayerName());
                 sleepGame(5000);
             } else {
                 System.out.println("Psychologist did not mute");
@@ -265,7 +270,7 @@ public class GameManager extends Thread {
                 server.talkingToVictim(mafiaTarget);
             }
         }
-        if(sniperTarget != null && sniperTarget != healedByDoctor && sniperTarget != healedMafia && sniperTarget.playerIsAlive()){
+        if(sniperTarget != null  && sniperTarget != healedMafia && sniperTarget.playerIsAlive()){
             sniperTarget.getPlayerRole().decreaseHealth();
             if(sniperTarget.getPlayerRole().getHealth() == 0){
                 server.talkingToVictim(sniperTarget);
@@ -378,6 +383,7 @@ public class GameManager extends Thread {
     }
 
     private void setPlayersRoles(){
+        System.out.println();
         for(int i=0; i<numberOfPlayers; i++){
             players.get(i).setPlayerRole(roles.get(i));
             System.out.println(players.get(i).getPlayerName() + " --> " + roles.get(i));
@@ -470,9 +476,12 @@ public class GameManager extends Thread {
 
         outOfVote = false;
 
+        server.getVotes().clear();
 
         while (!allWaiting()) { }
 
+        System.out.println("\nvoting");
+        sleepGame(3000);
         notifyPlayers();
 
         Timer timer = new Timer();

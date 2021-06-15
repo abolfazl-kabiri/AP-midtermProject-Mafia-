@@ -169,65 +169,98 @@ public class Server {
 
     public boolean acceptableMafiaConsult(String name){
         boolean accepted = false;
-        if(getCitizenList().contains(name))
-            accepted = true;
+        for(PlayerHandler player : playerHandlers){
+            if(player.getPlayerName().equalsIgnoreCase(name) && player.playerIsAlive()){
+                accepted = true;
+                break;
+            }
+        }
         return accepted;
     }
 
     public boolean acceptableMafiaHeal(String name){
         boolean accepted = false;
-        if(getMafiaList().contains(name)){
-            PlayerHandler player = findHandler(name);
-            if(player.getPlayerRole() instanceof DrLector && player.isHealed())
-                accepted = false;
-            else{
-                accepted = true;
-                player.setHealed(true);
-            }
 
+        for(PlayerHandler player : playerHandlers){
+            if(player.playerIsAlive() && player.getPlayerName().equals(name)){
+                if(player.getPlayerRole() instanceof DrLector && player.isHealed())
+                    accepted = false;
+                else{
+                    accepted = true;
+                    player.setHealed(true);
+                }
+                break;
+            }
         }
-        else
-            accepted = false;
+
         return accepted;
     }
 
     public boolean acceptableDoctorHeal(String name){
         boolean accepted = false;
-        if(getList().contains(name)){
-            PlayerHandler player = findHandler(name);
-            if(player.getPlayerRole() instanceof Doctor && player.isHealed())
-                accepted = false;
-            else{
-                accepted = true;
-                player.setHealed(true);
+
+        for (PlayerHandler player : playerHandlers){
+            if(player.playerIsAlive() && player.getPlayerName().equals(name)){
+                if(player.getPlayerRole() instanceof Doctor && player.isHealed())
+                    accepted = false;
+                else{
+                    accepted = true;
+                    player.setHealed(true);
+                }
+                break;
             }
         }
-        else
-            accepted = false;
+
         return accepted;
     }
 
     public boolean acceptableCheckRole(String name){
         boolean accept = false;
         String detectiveName = findByRole("Detective").getPlayerName();
-        if(getList().contains(name) && (!name.equals(detectiveName)))
-            accept = true;
+
+        for(PlayerHandler player : playerHandlers){
+            if(player.playerIsAlive() && player.getPlayerName().equals(name) && !name.equals(detectiveName)){
+                accept = true;
+                break;
+            }
+        }
+
         return accept;
     }
 
     public boolean acceptableSniperShot(String name){
         boolean accept = false;
         String sniperName = findByRole("Sniper").getPlayerName();
-        if((getList().contains(name) && (!name.equals(sniperName))) || (name.equalsIgnoreCase("no")) )
+
+        if(name.equalsIgnoreCase("no"))
             accept = true;
+        else {
+            for(PlayerHandler player : playerHandlers){
+                if(player.playerIsAlive() && player.getPlayerName().equals(name) && !name.equals(sniperName)){
+                    accept = true;
+                    break;
+                }
+            }
+        }
+
         return accept;
     }
 
     public boolean acceptablePsychoChoice(String name){
         boolean accept = false;
         String psychoName = findByRole("Psychologist").getPlayerName();
-        if((getList().contains(name) && (!name.equals(psychoName))) || (name.equalsIgnoreCase("no")) )
+
+        if(name.equalsIgnoreCase("no"))
             accept = true;
+        else{
+            for(PlayerHandler player : playerHandlers){
+                if(player.playerIsAlive() && player.getPlayerName().equals(name) && !name.equals(psychoName)){
+                    accept = true;
+                    break;
+                }
+            }
+        }
+
         return accept;
     }
 
@@ -372,20 +405,17 @@ public class Server {
         if(response.equals("yes")){
             PlayerHandler player = findHandler(victim);
             talkingToVictim(player);
+            victim = null;
 
         }else{
             System.out.println("voting canceled by mayor");
             //gameManager.notifyPlayers();
             for(PlayerHandler playerHandler : playerHandlers)
                 playerHandler.sendMessage("voting canceled by mayor");
-            victim = "";
+            victim = null;
         }
 
-        try {
-            Thread.sleep(1000);
-        } catch (InterruptedException interruptedException) {
-            interruptedException.printStackTrace();
-        }
+
         gameManager.canStartNight = true;
     }
 

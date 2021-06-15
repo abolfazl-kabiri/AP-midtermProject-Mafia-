@@ -6,14 +6,14 @@ public class PlayerHandler extends Thread{
 
     private Server server;
     private Socket socket;
-    private String playerName;
-    private Role playerRole;
-    private boolean isReady;
     private ObjectInputStream in;
     private ObjectOutputStream out;
-    private boolean isAlive;
+    private String playerName;
+    private Role playerRole;
     private Thread chat;
     private Thread vote;
+    private boolean isReady;
+    private boolean isAlive;
     private boolean healed;
     private boolean muted;
 
@@ -45,7 +45,9 @@ public class PlayerHandler extends Thread{
 
         handleIntroduction();
 
-        while (server.gameContinues()){
+
+
+        while (true){
 
             waitPlayer();
 
@@ -57,11 +59,16 @@ public class PlayerHandler extends Thread{
 
             vote();
 
+            if (!server.gameContinues())
+                break;
+
             waitPlayer();
 
-            if(server.gameContinues()){
-                night();
-            }
+            night();
+
+            if(!server.gameContinues())
+                break;
+
         }
     }
 
@@ -172,7 +179,12 @@ public class PlayerHandler extends Thread{
                 while (message == null){
                     try {
                         message = (Message) in.readObject();
-                    } catch (IOException | ClassNotFoundException e){
+                    }
+//                    catch (SocketException s){
+//                        System.out.println(playerName + " disconnected");
+//                        server.removePlayer(getPlayer());
+//                    }
+                    catch (IOException | ClassNotFoundException e){
                         e.printStackTrace();
                     }
                 }
@@ -195,8 +207,12 @@ public class PlayerHandler extends Thread{
                     if(msgToken.length > 1 && msgToken[1].equals("history")){
                         server.history(getPlayer());
                     }
-                    if(!(msg.equals("finish") || msg.equals("history")))
+
+                    if(msgToken.length > 1  && (msgToken[1].equals("finish") || msgToken[1].equals("history")))
+                        continue;
+                    else
                         server.broadcast(msg);
+
                 }
                 setReady(true);
                 return;
@@ -327,7 +343,7 @@ public class PlayerHandler extends Thread{
 
     public void night(){
         try {
-            Thread.sleep(6000);
+            Thread.sleep(3000);
         } catch (InterruptedException interruptedException) {
             interruptedException.printStackTrace();
         }
@@ -335,11 +351,6 @@ public class PlayerHandler extends Thread{
         sendMessage("It is night");
         waitPlayer();
 
-        try {
-            Thread.sleep(2000);
-        } catch (InterruptedException interruptedException) {
-            interruptedException.printStackTrace();
-        }
     }
 
     public String mafiaConsult(){
@@ -358,7 +369,9 @@ public class PlayerHandler extends Thread{
                 Message message = new Message(msg);
                 out.writeObject(message);
             }
-        }  catch (IOException io){
+        } catch (SocketException e){
+            System.exit(0);
+        } catch (IOException io){
             io.printStackTrace();
         }
     }
