@@ -152,7 +152,7 @@ public class GameManager extends Thread {
             sleepGame(5000);
         }
 
-        if(server.checkAlive("DrLecter")){
+        if(lecterCondition()){
             String healed = server.findByRole("DrLecter").actionCall();
             System.out.println("lecter choice: " + healed);
             this.healedMafia = server.findHandler(healed);
@@ -163,6 +163,15 @@ public class GameManager extends Thread {
             sleepGame(5000);
         }
 
+    }
+
+    private boolean lecterCondition(){
+        if(server.checkAlive("DrLecter") && numberOfMafias > 1)
+            return true;
+        else if(server.checkAlive("DrLecter") && numberOfMafias == 1 && !server.findByRole("DrLecter").isHealed())
+            return true;
+        else
+            return false;
     }
 
     private void citizenTime(){

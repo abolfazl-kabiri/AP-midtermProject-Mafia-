@@ -162,7 +162,7 @@ public class PlayerHandler extends Thread{
     public void handleChatTime(){
         chatTime = true;
         if(playerIsAlive()){
-            sendMessage("It is day\nyou can chat for 5 minutes or you can send \"ready\" to stop sending");
+            sendMessage("\nIt is day\nyou can chat for 5 minutes or you can send \"ready\" to stop sending");
             isReady = false;
             if(muted)
                 isReady = true;
@@ -176,18 +176,17 @@ public class PlayerHandler extends Thread{
 
             private Message getMessage(){
                 message = null;
-                while (message == null){
-                    try {
+                try {
+                    while (message == null){
                         message = (Message) in.readObject();
                     }
-//                    catch (SocketException s){
-//                        System.out.println(playerName + " disconnected");
-//                        server.removePlayer(getPlayer());
-//                    }
-                    catch (IOException | ClassNotFoundException e){
-                        e.printStackTrace();
-                    }
+                }catch (SocketException s){
+                    System.out.println(playerName + " disconnected");
+                    server.removePlayer(getPlayer());
+                } catch (IOException | ClassNotFoundException e){
+                    e.printStackTrace();
                 }
+
                 return message;
             }
 
@@ -196,6 +195,8 @@ public class PlayerHandler extends Thread{
             public void run() {
                 while (chatTime && (!muted) && playerIsAlive()){
                     message = getMessage();
+                    if(message == null)
+                        return;
                     msg = message.getText();
                     System.out.println(msg);
 
@@ -204,8 +205,12 @@ public class PlayerHandler extends Thread{
                         isReady = true;
                         return;
                     }
-                    if(msgToken.length > 1 && msgToken[1].equals("history")){
+                    if(msgToken.length > 1 && msgToken[1].equalsIgnoreCase("history")){
                         server.history(getPlayer());
+                    }
+
+                    if(msgToken.length > 1 && msgToken[1].equalsIgnoreCase("exit")){
+                        server.removePlayer(getPlayer());
                     }
 
                     if(msgToken.length > 1  && (msgToken[1].equals("finish") || msgToken[1].equals("history")))
@@ -306,12 +311,13 @@ public class PlayerHandler extends Thread{
 
         if(!(playerRole instanceof Mayor)){
             sendMessage("wait for mayor");
-        //    waitPlayer();
+
         } else if(playerIsAlive()){
            msg = playerRole.action(out,in,server);
            server.mayorResponse(msg);
-         //  waitPlayer();
+
         } else{
+            System.out.println("mayor has been killed");
             server.mayorResponse("yes");
         }
     }

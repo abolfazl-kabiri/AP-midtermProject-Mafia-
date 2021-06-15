@@ -103,11 +103,13 @@ public class Server {
 
     public boolean allReady(){
 
-       for(PlayerHandler player : playerHandlers){
-           if(player.playerIsAlive() && !(player.isReady()))
-               return false;
-       }
-       return true;
+        synchronized (playerHandlers){
+            for(PlayerHandler player : playerHandlers){
+                if(player.playerIsAlive() && !(player.isReady()))
+                    return false;
+            }
+            return true;
+        }
     }
 
     public boolean checkName(String name){
@@ -432,7 +434,7 @@ public class Server {
 
     public void mafiaConsult(){
         for(PlayerHandler player : playerHandlers){
-            if((!(player.getPlayerRole() instanceof Godfather)) && (player.getPlayerRole() instanceof Mafia)){
+            if((!(player.getPlayerRole() instanceof Godfather)) && (player.getPlayerRole() instanceof Mafia) && player.playerIsAlive()){
                 storeVotes(player.getPlayerName(), player.mafiaConsult());
             }
         }

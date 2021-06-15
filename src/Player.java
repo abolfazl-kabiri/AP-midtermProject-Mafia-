@@ -200,7 +200,7 @@ public class Player {
     }
 
     private int setPort() {
-        System.out.print("enter port: ");
+        System.out.print("enter port (main port is 2022) : ");
         try {
             port = scanner.nextInt();
         } catch (InputMismatchException input){
