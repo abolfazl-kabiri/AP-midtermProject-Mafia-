@@ -1,4 +1,4 @@
-import java.io.IOException;
+import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.*;
@@ -14,6 +14,8 @@ public class Server {
     private HashMap<String,String> votes;
     private ArrayList<Role> removedRoles;
     private GameManager gameManager;
+    private File file;
+
 
     public Server() {
         playerHandlers = new Vector<>();
@@ -21,6 +23,7 @@ public class Server {
         port = 2022;
         votes = new HashMap<>();
         removedRoles = new ArrayList<>();
+        file = new File("chat.txt");
     }
 
     Scanner scanner = new Scanner(System.in);
@@ -71,8 +74,31 @@ public class Server {
     }
 
     public void broadcast(String msg){
+            try (FileWriter fileWriter = new FileWriter(file,true)) {
+              fileWriter.write(msg+"\n");
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         for(PlayerHandler p: playerHandlers)
             p.sendMessage(msg);
+    }
+
+    public void history(PlayerHandler player){
+        player.sendMessage("\nhistory");
+        try {
+            FileReader fileReader = new FileReader(file);
+            BufferedReader bufferedReader = new BufferedReader(fileReader);
+            String msg;
+            while ((msg = bufferedReader.readLine()) != null){
+                player.sendMessage(msg);
+            }
+            fileReader.close();
+            bufferedReader.close();
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     public boolean allReady(){

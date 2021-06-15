@@ -186,12 +186,16 @@ public class PlayerHandler extends Thread{
                     message = getMessage();
                     msg = message.getText();
                     System.out.println(msg);
+
                     String [] msgToken = msg.split(" ",2);
                     if(msgToken.length > 1 && msgToken[1].equalsIgnoreCase("ready")){
                         isReady = true;
                         return;
                     }
-                    if(!msg.equals("finish"))
+                    if(msgToken.length > 1 && msgToken[1].equals("history")){
+                        server.history(getPlayer());
+                    }
+                    if(!(msg.equals("finish") || msg.equals("history")))
                         server.broadcast(msg);
                 }
                 setReady(true);
@@ -204,6 +208,10 @@ public class PlayerHandler extends Thread{
 
         chat.start();
         waitPlayer();
+    }
+
+    private PlayerHandler getPlayer(){
+        return  this;
     }
 
     boolean voteTime;
@@ -398,10 +406,6 @@ public class PlayerHandler extends Thread{
 
     public void setHealed(boolean healed) {
         this.healed = healed;
-    }
-
-    public boolean isMuted() {
-        return muted;
     }
 
     public void setMuted(boolean muted) {
